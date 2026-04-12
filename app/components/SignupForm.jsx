@@ -3,21 +3,48 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import {
-  FiUser, FiPhone, FiMapPin, FiBriefcase,
-  FiHeart, FiSend, FiChevronDown, FiUsers,
-  FiGlobe, FiLoader
+  FiUser,
+  FiPhone,
+  FiMapPin,
+  FiBriefcase,
+  FiHeart,
+  FiSend,
+  FiChevronDown,
+  FiUsers,
+  FiGlobe,
+  FiLoader,
 } from "react-icons/fi";
 import {
-  MdOutlineCoffee, MdOutlineDirectionsBus, MdOutlineSmokingRooms,
-  MdOutlineLocalBar, MdOutlineFastfood, MdOutlineGroup
+  MdOutlineCoffee,
+  MdOutlineDirectionsBus,
+  MdOutlineSmokingRooms,
+  MdOutlineLocalBar,
+  MdOutlineFastfood,
+  MdOutlineGroup,
 } from "react-icons/md";
 
 const LANGUAGES = [
-  "Hindi", "English", "Tamil", "Telugu", "Kannada",
-  "Malayalam", "Marathi", "Bengali", "Punjabi", "Gujarati"
+  "Hindi",
+  "English",
+  "Tamil",
+  "Telugu",
+  "Kannada",
+  "Malayalam",
+  "Marathi",
+  "Bengali",
+  "Punjabi",
+  "Gujarati",
 ];
 
-function SelectInput({ label, icon, name, options, value, onChange, placeholder }) {
+function SelectInput({
+  label,
+  icon,
+  name,
+  options,
+  value,
+  onChange,
+  placeholder,
+}) {
   return (
     <div>
       {label && <label className="field-label">{label}</label>}
@@ -45,7 +72,15 @@ function SelectInput({ label, icon, name, options, value, onChange, placeholder 
   );
 }
 
-function TextInput({ label, icon, name, value, onChange, placeholder, type = "text" }) {
+function TextInput({
+  label,
+  icon,
+  name,
+  value,
+  onChange,
+  placeholder,
+  type = "text",
+}) {
   return (
     <div>
       {label && <label className="field-label">{label}</label>}
@@ -90,7 +125,9 @@ function SectionHeader({ icon, title, subtitle }) {
       </div>
       <div>
         <h2 className="text-base font-bold text-charcoal">{title}</h2>
-        {subtitle && <p className="text-xs text-coffee-500 mt-0.5">{subtitle}</p>}
+        {subtitle && (
+          <p className="text-xs text-coffee-500 mt-0.5">{subtitle}</p>
+        )}
       </div>
     </div>
   );
@@ -138,7 +175,11 @@ function StepIndicator({ current, total }) {
         <div
           key={i}
           className={`h-1.5 rounded-full transition-all duration-300 ${
-            i < current ? "bg-coffee-500 w-5" : i === current ? "bg-coffee-400 w-8" : "bg-coffee-200 w-5"
+            i < current
+              ? "bg-coffee-500 w-5"
+              : i === current
+                ? "bg-coffee-400 w-8"
+                : "bg-coffee-200 w-5"
           }`}
         />
       ))}
@@ -209,7 +250,9 @@ export default function SignupForm() {
         <div className="max-w-lg mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <MdOutlineCoffee className="text-coffee-600 text-xl" />
-            <span className="font-bold text-coffee-800 text-base">CoffeeToTrip</span>
+            <span className="font-bold text-coffee-800 text-base">
+              CoffeeToTrips
+            </span>
           </div>
           <StepIndicator current={step} total={TOTAL_STEPS} />
           <span className="text-xs text-coffee-500 font-medium">
@@ -219,14 +262,17 @@ export default function SignupForm() {
       </div>
 
       <div className="max-w-lg mx-auto px-4 py-6 space-y-4">
-
         {/* ─── STEP 0: About You ─── */}
         {step === 0 && (
           <>
             <div className="text-center py-4">
               <p className="text-3xl mb-2">☕</p>
-              <h1 className="text-2xl font-bold text-charcoal">Let's get you started</h1>
-              <p className="text-sm text-coffee-500 mt-1">Basic details first. Quick & easy.</p>
+              <h1 className="text-2xl font-bold text-charcoal">
+                Let's get you started
+              </h1>
+              <p className="text-sm text-coffee-500 mt-1">
+                Basic details first. Quick & easy.
+              </p>
             </div>
 
             <div className="section-card space-y-4">
@@ -240,7 +286,9 @@ export default function SignupForm() {
                 onChange={update}
                 placeholder="Your full name"
               />
-              {errors.name && <p className="text-red-500 text-xs -mt-2">{errors.name}</p>}
+              {errors.name && (
+                <p className="text-red-500 text-xs -mt-2">{errors.name}</p>
+              )}
 
               <TextInput
                 label="Phone Number"
@@ -251,7 +299,9 @@ export default function SignupForm() {
                 placeholder="+91 98765 43210"
                 type="tel"
               />
-              {errors.phone && <p className="text-red-500 text-xs -mt-2">{errors.phone}</p>}
+              {errors.phone && (
+                <p className="text-red-500 text-xs -mt-2">{errors.phone}</p>
+              )}
 
               <div className="grid grid-cols-2 gap-3">
                 <TextInput
@@ -268,7 +318,12 @@ export default function SignupForm() {
                   value={form.gender}
                   onChange={update}
                   placeholder="Select"
-                  options={["Male", "Female", "Non-binary", "Prefer not to say"]}
+                  options={[
+                    "Male",
+                    "Female",
+                    "Non-binary",
+                    "Prefer not to say",
+                  ]}
                 />
               </div>
 
@@ -280,7 +335,9 @@ export default function SignupForm() {
                 onChange={update}
                 placeholder="Where are you based?"
               />
-              {errors.city && <p className="text-red-500 text-xs -mt-2">{errors.city}</p>}
+              {errors.city && (
+                <p className="text-red-500 text-xs -mt-2">{errors.city}</p>
+              )}
 
               <TextInput
                 label="Profession"
@@ -301,8 +358,12 @@ export default function SignupForm() {
           <>
             <div className="text-center py-4">
               <p className="text-3xl mb-2">🎟️</p>
-              <h1 className="text-2xl font-bold text-charcoal">Participation & Lifestyle</h1>
-              <p className="text-sm text-coffee-500 mt-1">Help us understand your travel style.</p>
+              <h1 className="text-2xl font-bold text-charcoal">
+                Participation & Lifestyle
+              </h1>
+              <p className="text-sm text-coffee-500 mt-1">
+                Help us understand your travel style.
+              </p>
             </div>
 
             <div className="section-card space-y-4">
@@ -319,8 +380,14 @@ export default function SignupForm() {
                 onChange={update}
                 options={[
                   { value: "self", label: "Self-funded (paying myself)" },
-                  { value: "co-sponsor", label: "Co-sponsor (split with someone)" },
-                  { value: "sponsored", label: "Sponsored (looking for sponsor)" },
+                  {
+                    value: "co-sponsor",
+                    label: "Co-sponsor (split with someone)",
+                  },
+                  {
+                    value: "sponsored",
+                    label: "Sponsored (looking for sponsor)",
+                  },
                 ]}
               />
 
@@ -403,8 +470,12 @@ export default function SignupForm() {
           <>
             <div className="text-center py-4">
               <p className="text-3xl mb-2">🧩</p>
-              <h1 className="text-2xl font-bold text-charcoal">Vibe & Group Fit</h1>
-              <p className="text-sm text-coffee-500 mt-1">What kind of traveller are you?</p>
+              <h1 className="text-2xl font-bold text-charcoal">
+                Vibe & Group Fit
+              </h1>
+              <p className="text-sm text-coffee-500 mt-1">
+                What kind of traveller are you?
+              </p>
             </div>
 
             <div className="section-card space-y-4">
@@ -482,7 +553,9 @@ export default function SignupForm() {
             <div className="text-center py-4">
               <p className="text-3xl mb-2">✈️</p>
               <h1 className="text-2xl font-bold text-charcoal">Trip Details</h1>
-              <p className="text-sm text-coffee-500 mt-1">Tell us your travel intent and budget.</p>
+              <p className="text-sm text-coffee-500 mt-1">
+                Tell us your travel intent and budget.
+              </p>
             </div>
 
             <div className="section-card space-y-4">
@@ -499,7 +572,10 @@ export default function SignupForm() {
                 options={[
                   { value: "yes", label: "Yes — let's go!" },
                   { value: "maybe", label: "Maybe — depends on the group" },
-                  { value: "no", label: "Not right now — just here for coffee meetups" },
+                  {
+                    value: "no",
+                    label: "Not right now — just here for coffee meetups",
+                  },
                 ]}
               />
 
@@ -537,10 +613,16 @@ export default function SignupForm() {
                     value={form.readiness}
                     onChange={update}
                     options={[
-                      { value: "immediate", label: "Immediately — let's plan now" },
+                      {
+                        value: "immediate",
+                        label: "Immediately — let's plan now",
+                      },
                       { value: "1month", label: "Within a month" },
                       { value: "3months", label: "Next 3 months" },
-                      { value: "flexible", label: "Flexible — whenever it happens" },
+                      {
+                        value: "flexible",
+                        label: "Flexible — whenever it happens",
+                      },
                     ]}
                   />
                 </>
@@ -579,7 +661,9 @@ export default function SignupForm() {
 
             {/* Summary card */}
             <div className="bg-coffee-50 border border-coffee-200 rounded-2xl p-4">
-              <p className="text-xs font-semibold text-coffee-700 mb-2 uppercase tracking-wide">Your Summary</p>
+              <p className="text-xs font-semibold text-coffee-700 mb-2 uppercase tracking-wide">
+                Your Summary
+              </p>
               <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs text-coffee-800">
                 {form.name && <span>👤 {form.name}</span>}
                 {form.city && <span>📍 {form.city}</span>}
@@ -593,7 +677,9 @@ export default function SignupForm() {
         )}
 
         {/* Navigation Buttons */}
-        <div className={`flex gap-3 pt-2 ${step === 0 ? "justify-end" : "justify-between"}`}>
+        <div
+          className={`flex gap-3 pt-2 ${step === 0 ? "justify-end" : "justify-between"}`}
+        >
           {step > 0 && (
             <button
               onClick={handleBack}
@@ -629,7 +715,8 @@ export default function SignupForm() {
         </div>
 
         <p className="text-center text-xs text-coffee-400 pb-6">
-          By submitting, you agree to be contacted on WhatsApp for group updates.
+          By submitting, you agree to be contacted on WhatsApp for group
+          updates.
         </p>
       </div>
     </div>

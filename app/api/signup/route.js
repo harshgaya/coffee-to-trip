@@ -4,10 +4,10 @@ export async function POST(req) {
   try {
     const body = await req.json();
 
-    if (!body.name || !body.phone) {
+    if (!body.firstName || !body.phone) {
       return Response.json(
-        { success: false, error: "Name and phone are required." },
-        { status: 400 }
+        { success: false, error: "First name and phone are required." },
+        { status: 400 },
       );
     }
 
@@ -22,12 +22,18 @@ export async function POST(req) {
 
     const result = await collection.insertOne(doc);
 
+    if (body.draftId) {
+      try {
+        await db.collection("drafts").deleteOne({ draftId: body.draftId });
+      } catch {}
+    }
+
     return Response.json({ success: true, id: result.insertedId });
   } catch (error) {
     console.error("Signup error:", error);
     return Response.json(
       { success: false, error: error.message },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

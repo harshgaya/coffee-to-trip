@@ -32,6 +32,26 @@ const TRIP_COLORS = {
   no: "bg-gray-100 text-gray-500",
 };
 
+function fullName(u) {
+  return `${u?.firstName || ""} ${u?.lastName || ""}`.trim() || "—";
+}
+
+function SortIcon({ k, sortKey, sortDir }) {
+  return (
+    <span>
+      {sortKey === k ? (
+        sortDir === "asc" ? (
+          <FiChevronUp className="inline ml-1 text-coffee-600" />
+        ) : (
+          <FiChevronDown className="inline ml-1 text-coffee-600" />
+        )
+      ) : (
+        <FiChevronDown className="inline ml-1 text-gray-300" />
+      )}
+    </span>
+  );
+}
+
 function Pill({ value, colorMap, fallback = "bg-gray-100 text-gray-600" }) {
   if (!value) return <span className="text-gray-300 text-xs">—</span>;
   const cls = colorMap?.[value] || fallback;
@@ -63,7 +83,7 @@ function ConfirmModal({ user, onConfirm, onCancel }) {
           <p className="font-semibold text-charcoal">Delete this signup?</p>
         </div>
         <p className="text-sm text-gray-600 mb-5">
-          <strong>{user?.name}</strong> ({user?.city}) will be permanently
+          <strong>{fullName(user)}</strong> ({user?.city}) will be permanently
           removed. This cannot be undone.
         </p>
         <div className="flex gap-3">
@@ -89,11 +109,15 @@ function UserDrawer({ user, onClose }) {
   if (!user) return null;
 
   const fields = [
+    { label: "First Name", value: user.firstName },
+    { label: "Last Name", value: user.lastName },
     { label: "Phone", value: user.phone },
     { label: "Age", value: user.age },
     { label: "Gender", value: user.gender },
     { label: "City", value: user.city },
     { label: "Profession", value: user.profession },
+    { label: "Age Confirmed", value: user.ageConfirmed ? "Yes" : null },
+    { label: "Preferred Date", value: user.preferredDate },
     {
       label: "Languages",
       value: Array.isArray(user.languages)
@@ -103,19 +127,37 @@ function UserDrawer({ user, onClose }) {
     { label: "Participation", value: user.participationType },
     { label: "Sponsor Preference", value: user.sponsorPreference },
     { label: "Sponsor Reason", value: user.sponsorReason },
+    { label: "Sponsor Consent", value: user.sponsorConsent ? "Agreed" : null },
     { label: "Drinking", value: user.drinking },
+    {
+      label: "Prefers Non-Drinking",
+      value: user.preferNonDrinking ? "Yes" : null,
+    },
     { label: "Smoking", value: user.smoking },
+    {
+      label: "Prefers Non-Smoking",
+      value: user.preferNonSmoking ? "Yes" : null,
+    },
     { label: "Food", value: user.food },
+    { label: "Prefers Veg Group", value: user.preferVegGroup ? "Yes" : null },
     { label: "Personality", value: user.personality },
     { label: "Conversation", value: user.conversation },
     { label: "Group Preference", value: user.groupPreference },
     { label: "Partner Name", value: user.partnerName },
+    { label: "Joining as Couple", value: user.joiningAsCouple ? "Yes" : null },
+    { label: "Both Will Attend", value: user.bothWillAttend ? "Yes" : null },
+    { label: "Paying for Both", value: user.payingForBoth ? "Yes" : null },
     { label: "Trip Intent", value: user.tripIntent },
     { label: "Trip Type", value: user.tripType },
     { label: "Budget", value: user.budget },
-    { label: "Readiness", value: user.readiness },
+    { label: "Travel Timing", value: user.travelTiming },
+    {
+      label: "₹1k Redeemable",
+      value: user.redeemableUnderstood ? "Understood" : null,
+    },
     { label: "Intent", value: user.intent },
-    { label: "Travel History", value: user.history },
+    { label: "Consent — Pricing", value: user.consentAgreed ? "Agreed" : null },
+    { label: "Consent — Format", value: user.consentFormat ? "Agreed" : null },
   ].filter((f) => f.value);
 
   return (
@@ -124,7 +166,7 @@ function UserDrawer({ user, onClose }) {
       <div className="relative w-full max-w-sm bg-white h-full overflow-y-auto shadow-2xl">
         <div className="sticky top-0 bg-white border-b border-coffee-100 p-4 flex items-center justify-between">
           <div>
-            <p className="font-bold text-charcoal">{user.name}</p>
+            <p className="font-bold text-charcoal">{fullName(user)}</p>
             <p className="text-xs text-coffee-500">
               {user.city} · Signed up{" "}
               {new Date(user.createdAt).toLocaleDateString("en-IN")}
@@ -154,7 +196,7 @@ function UserDrawer({ user, onClose }) {
           <div className="space-y-2 pt-1">
             {fields.map((f) => (
               <div key={f.label} className="flex items-start gap-2">
-                <span className="text-xs text-coffee-500 w-32 shrink-0 pt-0.5">
+                <span className="text-xs text-coffee-500 w-36 shrink-0 pt-0.5">
                   {f.label}
                 </span>
                 <span className="text-xs text-charcoal font-medium flex-1">
@@ -229,33 +271,27 @@ export default function AdminDashboard() {
     return sortDir === "asc" ? (av > bv ? 1 : -1) : av < bv ? 1 : -1;
   });
 
-  const SortIcon = ({ k }) =>
-    sortKey === k ? (
-      sortDir === "asc" ? (
-        <FiChevronUp className="inline ml-1 text-coffee-600" />
-      ) : (
-        <FiChevronDown className="inline ml-1 text-coffee-600" />
-      )
-    ) : (
-      <FiChevronDown className="inline ml-1 text-gray-300" />
-    );
-
   const exportCSV = () => {
     const keys = [
-      "name",
+      "firstName",
+      "lastName",
       "phone",
       "age",
       "gender",
       "city",
       "profession",
+      "preferredDate",
       "participationType",
       "drinking",
       "smoking",
       "food",
       "personality",
+      "conversation",
       "groupPreference",
       "tripIntent",
+      "travelTiming",
       "budget",
+      "intent",
       "createdAt",
     ];
     const rows = [keys.join(",")];
@@ -283,7 +319,6 @@ export default function AdminDashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
       <div className="bg-white border-b border-coffee-100 sticky top-0 z-10">
         <div className="max-w-screen-xl mx-auto px-4 py-3 flex items-center justify-between flex-wrap gap-3">
           <div className="flex items-center gap-2">
@@ -315,7 +350,6 @@ export default function AdminDashboard() {
       </div>
 
       <div className="max-w-screen-xl mx-auto px-4 py-5 space-y-4">
-        {/* Stats */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           <StatCard
             icon={<FiUsers />}
@@ -337,7 +371,6 @@ export default function AdminDashboard() {
           />
         </div>
 
-        {/* Filters */}
         <div className="bg-white border border-coffee-100 rounded-xl p-3 flex flex-wrap gap-2 items-center">
           <div className="relative flex-1 min-w-[200px]">
             <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-coffee-400 text-sm" />
@@ -352,12 +385,11 @@ export default function AdminDashboard() {
 
           <div className="flex items-center gap-1.5 flex-wrap">
             <FiFilter className="text-coffee-400 text-sm" />
-
             {[
               {
                 val: gender,
                 set: setGender,
-                options: ["Male", "Female", "Non-binary"],
+                options: ["Male", "Female"],
                 placeholder: "Gender",
               },
               {
@@ -412,7 +444,6 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        {/* Results count */}
         <div className="flex items-center justify-between px-1">
           <p className="text-xs text-coffee-500">
             Showing <strong>{sorted.length}</strong> of{" "}
@@ -425,24 +456,25 @@ export default function AdminDashboard() {
           )}
         </div>
 
-        {/* Table */}
         <div className="bg-white border border-coffee-100 rounded-2xl shadow-sm overflow-hidden">
           <div className="overflow-x-auto">
             <table className="min-w-full text-sm">
               <thead>
                 <tr className="bg-coffee-50 border-b border-coffee-100">
                   {[
-                    { label: "Name", key: "name" },
+                    { label: "Name", key: "firstName" },
                     { label: "Age", key: "age" },
                     { label: "Gender", key: "gender" },
                     { label: "City", key: "city" },
                     { label: "Phone", key: null },
+                    { label: "Date", key: "preferredDate" },
                     { label: "Participation", key: "participationType" },
                     { label: "Drink", key: "drinking" },
                     { label: "Smoke", key: "smoking" },
                     { label: "Food", key: "food" },
                     { label: "Group", key: "groupPreference" },
                     { label: "Trip", key: "tripIntent" },
+                    { label: "Timing", key: "travelTiming" },
                     { label: "Budget", key: "budget" },
                     { label: "Signed", key: "createdAt" },
                     { label: "", key: null },
@@ -453,101 +485,118 @@ export default function AdminDashboard() {
                       className={`px-3 py-3 text-left text-xs font-semibold text-coffee-700 uppercase tracking-wide whitespace-nowrap ${key ? "cursor-pointer hover:text-coffee-900 select-none" : ""}`}
                     >
                       {label}
-                      {key && <SortIcon k={key} />}
+                      {key && (
+                        <SortIcon k={key} sortKey={sortKey} sortDir={sortDir} />
+                      )}
                     </th>
                   ))}
                 </tr>
               </thead>
 
               <tbody>
-                {sorted.length === 0 && !loading && (
+                {sorted.length === 0 && !loading ? (
                   <tr>
                     <td
-                      colSpan={14}
+                      colSpan={16}
                       className="text-center py-16 text-coffee-400 text-sm"
                     >
                       No signups found.
                     </td>
                   </tr>
-                )}
-
-                {sorted.map((u) => (
-                  <tr
-                    key={u._id}
-                    className="border-t border-coffee-50 hover:bg-coffee-50/50 cursor-pointer transition-colors"
-                    onClick={() => setActiveUser(u)}
-                  >
-                    <td className="px-3 py-3 font-semibold text-charcoal whitespace-nowrap">
-                      {u.name}
-                    </td>
-                    <td className="px-3 py-3 text-coffee-700">
-                      {u.age || "—"}
-                    </td>
-                    <td className="px-3 py-3 text-coffee-700">
-                      {u.gender || "—"}
-                    </td>
-                    <td className="px-3 py-3 text-coffee-700 whitespace-nowrap">
-                      {u.city || "—"}
-                    </td>
-                    <td className="px-3 py-3 text-coffee-500 whitespace-nowrap">
-                      {u.phone ? (
-                        <a
-                          href={`https://wa.me/91${u.phone.replace(/\D/g, "")}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          onClick={(e) => e.stopPropagation()}
-                          className="text-green-600 hover:text-green-800 flex items-center gap-1 font-medium"
+                ) : (
+                  sorted.map((u) => (
+                    <tr
+                      key={u._id}
+                      className="border-t border-coffee-50 hover:bg-coffee-50/50 cursor-pointer transition-colors"
+                      onClick={() => setActiveUser(u)}
+                    >
+                      <td className="px-3 py-3 font-semibold text-charcoal whitespace-nowrap">
+                        {fullName(u)}
+                      </td>
+                      <td className="px-3 py-3 text-coffee-700">
+                        {u.age || "—"}
+                      </td>
+                      <td className="px-3 py-3 text-coffee-700">
+                        {u.gender || "—"}
+                      </td>
+                      <td className="px-3 py-3 text-coffee-700 whitespace-nowrap">
+                        {u.city || "—"}
+                      </td>
+                      <td className="px-3 py-3 text-coffee-500 whitespace-nowrap">
+                        {u.phone ? (
+                          <a
+                            href={`https://wa.me/91${u.phone.replace(/\D/g, "")}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            onClick={(e) => e.stopPropagation()}
+                            className="text-green-600 hover:text-green-800 flex items-center gap-1 font-medium"
+                          >
+                            <BsWhatsapp size={12} /> {u.phone}
+                          </a>
+                        ) : (
+                          <span>—</span>
+                        )}
+                      </td>
+                      <td className="px-3 py-3 text-xs text-coffee-600 whitespace-nowrap">
+                        {u.preferredDate
+                          ? new Date(u.preferredDate).toLocaleDateString(
+                              "en-IN",
+                              {
+                                day: "numeric",
+                                month: "short",
+                                year: "numeric",
+                              },
+                            )
+                          : "—"}
+                      </td>
+                      <td className="px-3 py-3">
+                        <span className="text-xs text-coffee-600 capitalize">
+                          {u.participationType || "—"}
+                        </span>
+                      </td>
+                      <td className="px-3 py-3">
+                        <Pill value={u.drinking} colorMap={LIFESTYLE_COLORS} />
+                      </td>
+                      <td className="px-3 py-3">
+                        <Pill value={u.smoking} colorMap={LIFESTYLE_COLORS} />
+                      </td>
+                      <td className="px-3 py-3 text-xs text-coffee-600 capitalize">
+                        {u.food || "—"}
+                      </td>
+                      <td className="px-3 py-3 text-xs text-coffee-600">
+                        {u.groupPreference || "—"}
+                      </td>
+                      <td className="px-3 py-3">
+                        <Pill value={u.tripIntent} colorMap={TRIP_COLORS} />
+                      </td>
+                      <td className="px-3 py-3 text-xs text-coffee-600 whitespace-nowrap">
+                        {u.travelTiming || "—"}
+                      </td>
+                      <td className="px-3 py-3 text-xs text-coffee-600">
+                        {u.budget || "—"}
+                      </td>
+                      <td className="px-3 py-3 text-xs text-coffee-400 whitespace-nowrap">
+                        {new Date(u.createdAt).toLocaleDateString("en-IN", {
+                          day: "numeric",
+                          month: "short",
+                          year: "2-digit",
+                        })}
+                      </td>
+                      <td className="px-3 py-3">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setDeleteTarget(u);
+                          }}
+                          className="text-gray-300 hover:text-red-500 transition-colors p-1 rounded"
+                          title="Delete"
                         >
-                          <BsWhatsapp size={12} /> {u.phone}
-                        </a>
-                      ) : (
-                        "—"
-                      )}
-                    </td>
-                    <td className="px-3 py-3">
-                      <span className="text-xs text-coffee-600 capitalize">
-                        {u.participationType || "—"}
-                      </span>
-                    </td>
-                    <td className="px-3 py-3">
-                      <Pill value={u.drinking} colorMap={LIFESTYLE_COLORS} />
-                    </td>
-                    <td className="px-3 py-3">
-                      <Pill value={u.smoking} colorMap={LIFESTYLE_COLORS} />
-                    </td>
-                    <td className="px-3 py-3 text-xs text-coffee-600 capitalize">
-                      {u.food || "—"}
-                    </td>
-                    <td className="px-3 py-3 text-xs text-coffee-600">
-                      {u.groupPreference || "—"}
-                    </td>
-                    <td className="px-3 py-3">
-                      <Pill value={u.tripIntent} colorMap={TRIP_COLORS} />
-                    </td>
-                    <td className="px-3 py-3 text-xs text-coffee-600">
-                      {u.budget || "—"}
-                    </td>
-                    <td className="px-3 py-3 text-xs text-coffee-400 whitespace-nowrap">
-                      {new Date(u.createdAt).toLocaleDateString("en-IN", {
-                        day: "numeric",
-                        month: "short",
-                        year: "2-digit",
-                      })}
-                    </td>
-                    <td className="px-3 py-3">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setDeleteTarget(u);
-                        }}
-                        className="text-gray-300 hover:text-red-500 transition-colors p-1 rounded"
-                        title="Delete"
-                      >
-                        <FiTrash2 size={14} />
-                      </button>
-                    </td>
-                  </tr>
-                ))}
+                          <FiTrash2 size={14} />
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>

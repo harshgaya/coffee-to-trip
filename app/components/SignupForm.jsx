@@ -17,6 +17,8 @@ import {
   FiWifiOff,
   FiAlertCircle,
   FiRefreshCw,
+  FiCalendar,
+  FiDollarSign,
 } from "react-icons/fi";
 import {
   MdOutlineDirectionsBus,
@@ -25,18 +27,6 @@ import {
   MdOutlineFastfood,
 } from "react-icons/md";
 
-const LANGUAGES = [
-  "Hindi",
-  "English",
-  "Tamil",
-  "Telugu",
-  "Kannada",
-  "Malayalam",
-  "Marathi",
-  "Bengali",
-  "Punjabi",
-  "Gujarati",
-];
 const DRAFT_KEY = "ctt_signup_draft";
 const DRAFT_ID_KEY = "ctt_draft_id";
 const MAX_RETRIES = 3;
@@ -90,7 +80,6 @@ function StickySaveBar({ status, online, onRetry, onClear, hasData }) {
   const visible = !online || !!status;
 
   let content = null;
-
   if (!online) {
     content = (
       <div className="flex items-center gap-2 text-xs text-amber-700">
@@ -251,43 +240,16 @@ function SubmitOverlay({ state, retryCount, onRetry, onReset }) {
 
 // ── Field Components ──────────────────────────────────────────────────────────
 
-function Label({ children }) {
-  return <label className="field-label">{children}</label>;
-}
-
-function SelectInput({
-  label,
-  icon,
-  name,
-  options,
-  value,
-  onChange,
-  placeholder,
-}) {
+function Label({ children, optional }) {
   return (
-    <div>
-      {label && <Label>{label}</Label>}
-      <div className="relative">
-        {icon && (
-          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-coffee-400 pointer-events-none">
-            {icon}
-          </span>
-        )}
-        <select
-          value={value || ""}
-          onChange={(e) => onChange(name, e.target.value)}
-          className={`field-select ${icon ? "pl-9" : ""} pr-9`}
-        >
-          <option value="">{placeholder || `Select ${label}`}</option>
-          {options.map((o) => (
-            <option key={o.value || o} value={o.value || o}>
-              {o.label || o}
-            </option>
-          ))}
-        </select>
-        <FiChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-coffee-400 pointer-events-none text-sm" />
-      </div>
-    </div>
+    <label className="field-label">
+      {children}
+      {optional && (
+        <span className="text-coffee-300 normal-case font-normal ml-1">
+          (optional)
+        </span>
+      )}
+    </label>
   );
 }
 
@@ -300,10 +262,11 @@ function TextInput({
   placeholder,
   type = "text",
   error,
+  optional,
 }) {
   return (
     <div>
-      {label && <Label>{label}</Label>}
+      {label && <Label optional={optional}>{label}</Label>}
       <div className="relative">
         {icon && (
           <span className="absolute left-3 top-1/2 -translate-y-1/2 text-coffee-400 pointer-events-none">
@@ -315,9 +278,7 @@ function TextInput({
           value={value || ""}
           placeholder={placeholder || label}
           onChange={(e) => onChange(name, e.target.value)}
-          className={`field-input ${icon ? "pl-9" : ""} ${
-            error ? "border-red-400 focus:ring-red-400" : ""
-          }`}
+          className={`field-input ${icon ? "pl-9" : ""} ${error ? "border-red-400 focus:ring-red-400" : ""}`}
         />
       </div>
       {error && (
@@ -329,10 +290,18 @@ function TextInput({
   );
 }
 
-function TextArea({ label, name, value, onChange, placeholder, rows = 3 }) {
+function TextArea({
+  label,
+  name,
+  value,
+  onChange,
+  placeholder,
+  rows = 3,
+  optional,
+}) {
   return (
     <div>
-      {label && <Label>{label}</Label>}
+      {label && <Label optional={optional}>{label}</Label>}
       <textarea
         rows={rows}
         value={value || ""}
@@ -340,6 +309,101 @@ function TextArea({ label, name, value, onChange, placeholder, rows = 3 }) {
         onChange={(e) => onChange(name, e.target.value)}
         className="field-input resize-none"
       />
+    </div>
+  );
+}
+
+function RadioGroup({ label, name, options, value, onChange }) {
+  return (
+    <div>
+      {label && <Label>{label}</Label>}
+      <div className="flex flex-wrap gap-2 mt-1.5">
+        {options.map((o) => {
+          const val = o.value || o;
+          const lbl = o.label || o;
+          const selected = value === val;
+          return (
+            <button
+              key={val}
+              type="button"
+              onClick={() => onChange(name, val)}
+              className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-all duration-150 active:scale-95 ${
+                selected
+                  ? "bg-coffee-600 text-white border-coffee-600"
+                  : "bg-white text-coffee-600 border-coffee-200 hover:border-coffee-400"
+              }`}
+            >
+              {lbl}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function CheckboxField({ name, label, checked, onChange, sublabel }) {
+  return (
+    <label className="flex items-start gap-3 cursor-pointer group">
+      <div className="mt-0.5 shrink-0">
+        <input
+          type="checkbox"
+          checked={!!checked}
+          onChange={(e) => onChange(name, e.target.checked)}
+          className="sr-only"
+        />
+        <div
+          className={`w-4 h-4 rounded border-2 flex items-center justify-center transition-all ${
+            checked
+              ? "bg-coffee-600 border-coffee-600"
+              : "border-coffee-300 group-hover:border-coffee-500"
+          }`}
+        >
+          {checked && <FiCheck size={10} className="text-white" />}
+        </div>
+      </div>
+      <div>
+        <p className="text-sm text-charcoal leading-snug">{label}</p>
+        {sublabel && (
+          <p className="text-xs text-coffee-400 mt-0.5">{sublabel}</p>
+        )}
+      </div>
+    </label>
+  );
+}
+
+function MultiCheckbox({ label, name, options, selected, onChange }) {
+  const toggle = (val) => {
+    const current = selected || [];
+    const updated = current.includes(val)
+      ? current.filter((v) => v !== val)
+      : [...current, val];
+    onChange(name, updated);
+  };
+  return (
+    <div>
+      {label && <Label>{label}</Label>}
+      <div className="flex flex-wrap gap-2 mt-1.5">
+        {options.map((o) => {
+          const val = o.value || o;
+          const lbl = o.label || o;
+          const sel = (selected || []).includes(val);
+          return (
+            <button
+              key={val}
+              type="button"
+              onClick={() => toggle(val)}
+              className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-all duration-150 active:scale-95 ${
+                sel
+                  ? "bg-coffee-600 text-white border-coffee-600"
+                  : "bg-white text-coffee-600 border-coffee-200 hover:border-coffee-400"
+              }`}
+            >
+              {lbl}
+            </button>
+          );
+        })}
+      </div>
     </div>
   );
 }
@@ -355,40 +419,6 @@ function SectionTitle({ icon, title, subtitle }) {
         {subtitle && (
           <p className="text-xs text-coffee-400 mt-0.5">{subtitle}</p>
         )}
-      </div>
-    </div>
-  );
-}
-
-function LanguageSelector({ selected, onChange }) {
-  const toggle = (lang) => {
-    const current = selected || [];
-    const updated = current.includes(lang)
-      ? current.filter((l) => l !== lang)
-      : [...current, lang];
-    onChange("languages", updated);
-  };
-  return (
-    <div>
-      <Label>Languages you speak</Label>
-      <div className="flex flex-wrap gap-2 mt-1.5">
-        {LANGUAGES.map((lang) => {
-          const sel = (selected || []).includes(lang);
-          return (
-            <button
-              key={lang}
-              type="button"
-              onClick={() => toggle(lang)}
-              className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-all duration-150 active:scale-95 ${
-                sel
-                  ? "bg-coffee-600 text-white border-coffee-600"
-                  : "bg-white text-coffee-600 border-coffee-200 hover:border-coffee-400"
-              }`}
-            >
-              {lang}
-            </button>
-          );
-        })}
       </div>
     </div>
   );
@@ -470,17 +500,13 @@ export default function SignupForm() {
       isFirst.current = false;
       return;
     }
-
     localStorage.setItem(DRAFT_KEY, JSON.stringify(form));
     setSave("saving");
-
     clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => syncDraft(form), 1500);
-
     return () => clearTimeout(debounceRef.current);
   }, [form, ready, syncDraft]);
 
-  // ── Update field ───────────────────────────────────────────────────────────
   const update = (key, value) => {
     setForm((p) => ({ ...p, [key]: value }));
     setErrors((p) => ({ ...p, [key]: undefined }));
@@ -489,9 +515,16 @@ export default function SignupForm() {
   // ── Validate ───────────────────────────────────────────────────────────────
   const validate = () => {
     const errs = {};
-    if (!form.name?.trim()) errs.name = "Name is required";
+    if (!form.firstName?.trim()) errs.firstName = "First name is required";
+    if (!form.lastName?.trim()) errs.lastName = "Last name is required";
     if (!form.phone?.trim()) errs.phone = "Phone number is required";
     if (!form.city?.trim()) errs.city = "City is required";
+    if (!form.gender) errs.gender = "Please select gender";
+    if (!form.age || Number(form.age) < 21) errs.age = "Must be 21 or older";
+    if (!form.ageConfirmed) errs.ageConfirmed = "Please confirm your age";
+    if (!form.consentAgreed) errs.consentAgreed = "Please agree to terms";
+    if (!form.consentFormat)
+      errs.consentFormat = "Please confirm experience format";
     setErrors(errs);
     if (Object.keys(errs).length > 0) {
       setTimeout(() => {
@@ -547,7 +580,6 @@ export default function SignupForm() {
     }
   };
 
-  // ── Clear draft ────────────────────────────────────────────────────────────
   const clearDraft = async () => {
     if (!confirm("Clear all saved progress and start fresh?")) return;
     const draftId = getDraftId();
@@ -561,6 +593,12 @@ export default function SignupForm() {
   };
 
   if (!ready) return null;
+
+  const isCouples = form.groupPreference === "couples";
+  const isSponsored = form.participationType === "sponsored";
+  const isCoSponsor = form.participationType === "co-sponsor";
+  const wantsTrip = form.tripIntent === "yes";
+  const pricingFee = form.gender === "Female" ? "₹2,999" : "₹3,999";
 
   return (
     <>
@@ -580,7 +618,6 @@ export default function SignupForm() {
         }}
       />
 
-      {/* ── Sticky Save Bar — always visible on scroll ── */}
       <StickySaveBar
         status={saveStatus}
         online={online}
@@ -618,24 +655,35 @@ export default function SignupForm() {
           </div>
         )}
 
-        {/* ── 1. Basic Info ── */}
+        {/* ── 1. Basic Details ── */}
         <div className="section-card space-y-4">
           <SectionTitle
             icon={<FiUser size={15} />}
-            title="Basic Info"
+            title="Basic Details"
             subtitle="Tell us who you are."
           />
 
-          <div data-error={errors.name ? true : undefined}>
-            <TextInput
-              label="Full Name *"
-              icon={<FiUser size={14} />}
-              name="name"
-              value={form.name}
-              onChange={update}
-              placeholder="Your full name"
-              error={errors.name}
-            />
+          <div className="grid grid-cols-2 gap-3">
+            <div data-error={errors.firstName ? true : undefined}>
+              <TextInput
+                label="First Name *"
+                name="firstName"
+                value={form.firstName}
+                onChange={update}
+                placeholder="First name"
+                error={errors.firstName}
+              />
+            </div>
+            <div data-error={errors.lastName ? true : undefined}>
+              <TextInput
+                label="Last Name *"
+                name="lastName"
+                value={form.lastName}
+                onChange={update}
+                placeholder="Last name"
+                error={errors.lastName}
+              />
+            </div>
           </div>
 
           <div data-error={errors.phone ? true : undefined}>
@@ -652,22 +700,31 @@ export default function SignupForm() {
           </div>
 
           <div className="grid grid-cols-2 gap-3">
-            <TextInput
-              label="Age"
-              name="age"
-              value={form.age}
-              onChange={update}
-              placeholder="25"
-              type="number"
-            />
-            <SelectInput
-              label="Gender"
-              name="gender"
-              value={form.gender}
-              onChange={update}
-              placeholder="Select"
-              options={["Male", "Female", "Non-binary", "Prefer not to say"]}
-            />
+            <div data-error={errors.age ? true : undefined}>
+              <TextInput
+                label="Age * (21+)"
+                name="age"
+                value={form.age}
+                onChange={update}
+                placeholder="25"
+                type="number"
+                error={errors.age}
+              />
+            </div>
+            <div data-error={errors.gender ? true : undefined}>
+              <RadioGroup
+                label="Gender *"
+                name="gender"
+                value={form.gender}
+                onChange={update}
+                options={["Male", "Female"]}
+              />
+              {errors.gender && (
+                <p className="text-red-500 text-xs mt-1 flex items-center gap-1">
+                  <FiAlertCircle size={10} /> {errors.gender}
+                </p>
+              )}
+            </div>
           </div>
 
           <div data-error={errors.city ? true : undefined}>
@@ -689,12 +746,46 @@ export default function SignupForm() {
             value={form.profession}
             onChange={update}
             placeholder="What do you do?"
+            optional
           />
-
-          <LanguageSelector selected={form.languages} onChange={update} />
         </div>
 
-        {/* ── 2. Participation ── */}
+        {/* ── 2. Age Confirmation ── */}
+        <div className="section-card space-y-3">
+          <SectionTitle icon={<FiCheck size={15} />} title="Age Confirmation" />
+          <div data-error={errors.ageConfirmed ? true : undefined}>
+            <CheckboxField
+              name="ageConfirmed"
+              label="I confirm I am 21 years or older"
+              checked={form.ageConfirmed}
+              onChange={update}
+            />
+            {errors.ageConfirmed && (
+              <p className="text-red-500 text-xs mt-1 flex items-center gap-1">
+                <FiAlertCircle size={10} /> {errors.ageConfirmed}
+              </p>
+            )}
+          </div>
+        </div>
+
+        {/* ── 3. Coffee Experience Slot ── */}
+        <div className="section-card space-y-4">
+          <SectionTitle
+            icon={<FiCalendar size={15} />}
+            title="Coffee Experience Slot"
+            subtitle="Pick your preferred date."
+          />
+          <TextInput
+            label="Preferred Date"
+            icon={<FiCalendar size={14} />}
+            name="preferredDate"
+            value={form.preferredDate}
+            onChange={update}
+            type="date"
+          />
+        </div>
+
+        {/* ── 4. Participation Type ── */}
         <div className="section-card space-y-4">
           <SectionTitle
             icon={<FiHeart size={15} />}
@@ -702,246 +793,387 @@ export default function SignupForm() {
             subtitle="How are you joining?"
           />
 
-          <SelectInput
-            label="How are you joining?"
-            name="participationType"
-            value={form.participationType}
-            onChange={update}
-            options={[
-              { value: "self", label: "Self-funded (paying myself)" },
-              { value: "co-sponsor", label: "Co-sponsor (split with someone)" },
-              { value: "sponsored", label: "Sponsored (looking for sponsor)" },
-            ]}
-          />
+          <div className="space-y-3">
+            <CheckboxField
+              name="participationType"
+              label="I will pay for myself"
+              checked={form.participationType === "self"}
+              onChange={() =>
+                update(
+                  "participationType",
+                  form.participationType === "self" ? "" : "self",
+                )
+              }
+            />
+            <CheckboxField
+              name="participationType"
+              label="I can co-sponsor someone"
+              checked={form.participationType === "co-sponsor"}
+              onChange={() =>
+                update(
+                  "participationType",
+                  form.participationType === "co-sponsor" ? "" : "co-sponsor",
+                )
+              }
+            />
+            <CheckboxField
+              name="participationType"
+              label="I am open to being sponsored"
+              checked={form.participationType === "sponsored"}
+              onChange={() =>
+                update(
+                  "participationType",
+                  form.participationType === "sponsored" ? "" : "sponsored",
+                )
+              }
+            />
+          </div>
 
-          {form.participationType === "sponsored" && (
+          {isSponsored && (
             <TextArea
-              label="Why should we consider you for sponsorship?"
+              label="Why should we consider you?"
               name="sponsorReason"
               value={form.sponsorReason}
               onChange={update}
               placeholder="Tell us about yourself and why you'd be a great travel companion..."
-              rows={4}
+              rows={3}
+              optional
             />
           )}
 
-          {form.participationType === "co-sponsor" && (
-            <SelectInput
-              label="Co-sponsor gender preference"
+          {isCoSponsor && (
+            <RadioGroup
+              label="Sponsor preference"
               name="sponsorPreference"
               value={form.sponsorPreference}
               onChange={update}
               options={["Male", "Female", "No preference"]}
             />
           )}
+
+          {(isSponsored || isCoSponsor) && (
+            <CheckboxField
+              name="sponsorConsent"
+              label="I understand sponsorship has no expectations attached"
+              checked={form.sponsorConsent}
+              onChange={update}
+            />
+          )}
         </div>
 
-        {/* ── 3. Lifestyle ── */}
-        <div className="section-card space-y-4">
+        {/* ── 5. Lifestyle ── */}
+        <div className="section-card space-y-5">
           <SectionTitle
             icon={<MdOutlineLocalBar size={15} />}
             title="Lifestyle"
             subtitle="Be honest — it helps with better matching."
           />
 
-          <SelectInput
-            label="Drinking"
-            icon={<MdOutlineLocalBar size={14} />}
-            name="drinking"
-            value={form.drinking}
-            onChange={update}
-            options={[
-              { value: "no", label: "Don't drink" },
-              { value: "social", label: "Social drinker" },
-              { value: "occasional", label: "Occasional" },
-              { value: "regular", label: "Regular" },
-            ]}
-          />
+          <div className="space-y-2">
+            <RadioGroup
+              label="Drinking"
+              name="drinking"
+              value={form.drinking}
+              onChange={update}
+              options={[
+                { value: "no", label: "No" },
+                { value: "social", label: "Social" },
+                { value: "occasional", label: "Occasional" },
+              ]}
+            />
+            <CheckboxField
+              name="preferNonDrinking"
+              label="Prefer non-drinking group"
+              checked={form.preferNonDrinking}
+              onChange={update}
+            />
+          </div>
 
-          <SelectInput
-            label="Smoking"
-            icon={<MdOutlineSmokingRooms size={14} />}
-            name="smoking"
-            value={form.smoking}
-            onChange={update}
-            options={[
-              { value: "non-smoker", label: "Non-smoker" },
-              { value: "smoker", label: "Smoker" },
-              { value: "prefer-non", label: "Prefer non-smoking company" },
-            ]}
-          />
+          <div className="space-y-2">
+            <RadioGroup
+              label="Smoking"
+              name="smoking"
+              value={form.smoking}
+              onChange={update}
+              options={[
+                { value: "non-smoker", label: "Non-smoker" },
+                { value: "smoker", label: "Smoker" },
+              ]}
+            />
+            <CheckboxField
+              name="preferNonSmoking"
+              label="Prefer non-smoking group"
+              checked={form.preferNonSmoking}
+              onChange={update}
+            />
+          </div>
 
-          <SelectInput
-            label="Food preference"
-            icon={<MdOutlineFastfood size={14} />}
-            name="food"
-            value={form.food}
-            onChange={update}
-            options={[
-              "Vegetarian",
-              "Vegan",
-              "Non-vegetarian",
-              "Jain",
-              "No preference",
-            ]}
-          />
+          <div className="space-y-2">
+            <RadioGroup
+              label="Food Preference"
+              name="food"
+              value={form.food}
+              onChange={update}
+              options={[
+                { value: "veg", label: "Veg" },
+                { value: "non-veg", label: "Non-veg" },
+                { value: "no-pref", label: "No preference" },
+              ]}
+            />
+            <CheckboxField
+              name="preferVegGroup"
+              label="Prefer veg-only group"
+              checked={form.preferVegGroup}
+              onChange={update}
+            />
+          </div>
         </div>
 
-        {/* ── 4. Vibe & Group ── */}
+        {/* ── 6. Personality & Vibe ── */}
         <div className="section-card space-y-4">
           <SectionTitle
             icon={<FiUsers size={15} />}
-            title="Vibe & Group Fit"
-            subtitle="What kind of traveller are you?"
+            title="Personality & Vibe"
+            subtitle="What kind of person are you?"
           />
 
-          <SelectInput
-            label="Personality type"
+          <RadioGroup
+            label="Personality"
             name="personality"
             value={form.personality}
             onChange={update}
             options={[
-              "Introvert — need quiet time to recharge",
-              "Extrovert — energised by people",
-              "Ambivert — depends on the mood",
-              "The planner — always has an itinerary",
-              "The free spirit — goes with the flow",
+              { value: "introvert", label: "Introvert" },
+              { value: "balanced", label: "Balanced" },
+              { value: "extrovert", label: "Extrovert" },
             ]}
           />
 
-          <SelectInput
-            label="Conversation style"
+          <RadioGroup
+            label="Conversation Style"
             name="conversation"
             value={form.conversation}
             onChange={update}
             options={[
-              "Deep talks — philosophy, life",
-              "Light & fun — memes, travel stories",
-              "Mostly listen, occasionally share",
-              "Whatever the vibe calls for",
+              { value: "deep", label: "Deep" },
+              { value: "fun", label: "Fun" },
+              { value: "networking", label: "Networking" },
             ]}
           />
+        </div>
 
-          <SelectInput
-            label="Group type preference"
+        {/* ── 7. Group Preference ── */}
+        <div className="section-card space-y-4">
+          <SectionTitle
+            icon={<FiUsers size={15} />}
+            title="Group Preference (Travel)"
+          />
+
+          <RadioGroup
             name="groupPreference"
             value={form.groupPreference}
             onChange={update}
             options={[
               { value: "all-men", label: "All men" },
               { value: "all-women", label: "All women" },
-              { value: "mixed", label: "Mixed group" },
+              { value: "mixed", label: "Mixed" },
               { value: "couples", label: "Couples only" },
-              { value: "no-preference", label: "No preference" },
             ]}
           />
 
-          {form.groupPreference === "couples" && (
-            <TextInput
-              label="Partner's Name"
-              icon={<FiHeart size={14} />}
-              name="partnerName"
-              value={form.partnerName}
-              onChange={update}
-              placeholder="Your partner's full name"
-            />
+          {isCouples && (
+            <div className="space-y-3 pt-1 border-t border-coffee-100">
+              <CheckboxField
+                name="joiningAsCouple"
+                label="Joining as a couple"
+                checked={form.joiningAsCouple}
+                onChange={update}
+              />
+              <TextInput
+                label="Partner's Name"
+                icon={<FiHeart size={14} />}
+                name="partnerName"
+                value={form.partnerName}
+                onChange={update}
+                placeholder="Your partner's full name"
+              />
+              <CheckboxField
+                name="bothWillAttend"
+                label="We both will attend"
+                checked={form.bothWillAttend}
+                onChange={update}
+              />
+              <CheckboxField
+                name="payingForBoth"
+                label="I will pay for both"
+                checked={form.payingForBoth}
+                onChange={update}
+              />
+            </div>
           )}
         </div>
 
-        {/* ── 5. Trip Details ── */}
+        {/* ── 8. Language Comfort ── */}
+        <div className="section-card space-y-3">
+          <SectionTitle icon={<FiGlobe size={15} />} title="Language Comfort" />
+          <MultiCheckbox
+            name="languages"
+            selected={form.languages}
+            onChange={update}
+            options={[
+              { value: "english", label: "English" },
+              { value: "hindi", label: "Hindi" },
+              { value: "telugu", label: "Telugu" },
+              { value: "all", label: "Comfortable with all" },
+            ]}
+          />
+        </div>
+
+        {/* ── 9. Trip Intent ── */}
         <div className="section-card space-y-4">
           <SectionTitle
             icon={<MdOutlineDirectionsBus size={15} />}
-            title="Trip Details"
-            subtitle="Your travel intent and budget."
+            title="Trip Intent"
+            subtitle="Open to travel after the coffee meetup?"
           />
 
-          <SelectInput
-            label="Are you open to going on a trip?"
+          <RadioGroup
             name="tripIntent"
             value={form.tripIntent}
             onChange={update}
             options={[
-              { value: "yes", label: "Yes — let's go!" },
-              { value: "maybe", label: "Maybe — depends on the group" },
-              { value: "no", label: "Not right now — just coffee meetups" },
+              { value: "no", label: "Not interested" },
+              { value: "maybe", label: "Maybe" },
+              { value: "yes", label: "Yes" },
             ]}
           />
 
-          {(form.tripIntent === "yes" || form.tripIntent === "maybe") && (
-            <>
-              <SelectInput
-                label="Trip type preference"
+          {wantsTrip && (
+            <div className="space-y-4 pt-2 border-t border-coffee-100">
+              <RadioGroup
+                label="Trip Type"
                 name="tripType"
                 value={form.tripType}
                 onChange={update}
                 options={[
-                  { value: "local", label: "Local (day trip / weekend)" },
-                  { value: "domestic", label: "Domestic (within India)" },
+                  { value: "local", label: "Local (1–2 days)" },
+                  { value: "domestic", label: "Domestic (3–8 days)" },
                   { value: "international", label: "International" },
-                  { value: "any", label: "Open to anything" },
                 ]}
               />
-              <SelectInput
-                label="Budget per trip (approx.)"
+
+              <RadioGroup
+                label="Budget Range (Per Head)"
                 name="budget"
                 value={form.budget}
                 onChange={update}
                 options={[
-                  { value: "5k-10k", label: "₹5,000 – ₹10,000" },
-                  { value: "10k-30k", label: "₹10,000 – ₹30,000" },
-                  { value: "30k-1L", label: "₹30,000 – ₹1,00,000" },
-                  { value: "1L+", label: "₹1,00,000+" },
+                  { value: "5k-10k", label: "₹5k–₹10k" },
+                  { value: "10k-30k", label: "₹10k–₹30k" },
+                  { value: "30k-1L", label: "₹30k–₹1L" },
+                  { value: "1L-2L", label: "₹1L–₹2L" },
+                  { value: "2L+", label: "₹2L+" },
                 ]}
               />
-              <SelectInput
-                label="When are you ready?"
-                name="readiness"
-                value={form.readiness}
+
+              <RadioGroup
+                label="Travel Timing"
+                name="travelTiming"
+                value={form.travelTiming}
                 onChange={update}
                 options={[
-                  { value: "immediate", label: "Immediately — let's plan now" },
-                  { value: "1month", label: "Within a month" },
-                  { value: "3months", label: "Next 3 months" },
-                  {
-                    value: "flexible",
-                    label: "Flexible — whenever it happens",
-                  },
+                  { value: "immediate", label: "Immediate" },
+                  { value: "this-weekend", label: "This weekend" },
+                  { value: "next-weekend", label: "Next weekend" },
+                  { value: "1-month", label: "Within 1 month" },
+                  { value: "exploring", label: "Just exploring" },
                 ]}
               />
-            </>
+            </div>
           )}
         </div>
 
-        {/* ── 6. Final Words ── */}
-        <div className="section-card space-y-4">
-          <SectionTitle
-            icon={<FiGlobe size={15} />}
-            title="Final Words"
-            subtitle="Optional but helpful."
-          />
+        {/* ── 10. Pricing ── */}
+        <div className="bg-coffee-50 border border-coffee-200 rounded-2xl p-5">
+          <p className="text-xs font-bold text-coffee-700 uppercase tracking-wider mb-3">
+            Pricing
+          </p>
+          <div className="flex items-center justify-between mb-3">
+            <div className="space-y-1">
+              <p className="text-sm text-charcoal">
+                <span className="font-semibold">Men:</span> ₹3,999
+              </p>
+              <p className="text-sm text-charcoal">
+                <span className="font-semibold">Women:</span> ₹2,999
+              </p>
+            </div>
+            {form.gender && (
+              <div className="text-right">
+                <p className="text-xs text-coffee-500">Your fee</p>
+                <p className="text-2xl font-bold text-coffee-700">
+                  {pricingFee}
+                </p>
+              </div>
+            )}
+          </div>
+          <div className="bg-white border border-coffee-100 rounded-xl px-3 py-2.5">
+            <CheckboxField
+              name="redeemableUnderstood"
+              label="I understand ₹1,000 is redeemable at the café (food & beverages)"
+              checked={form.redeemableUnderstood}
+              onChange={update}
+            />
+          </div>
+        </div>
 
-          <SelectInput
-            label="Your primary intent for joining"
+        {/* ── 11. Intent ── */}
+        <div className="section-card space-y-4">
+          <SectionTitle icon={<FiGlobe size={15} />} title="Your Intent" />
+          <RadioGroup
             name="intent"
             value={form.intent}
             onChange={update}
             options={[
-              "Just looking to make travel friends",
-              "Find a consistent travel buddy",
-              "Social meetups first, trips later",
-              "Serious about planning a trip ASAP",
+              { value: "meet-people", label: "Meet new people" },
+              { value: "travel", label: "Travel experiences" },
+              { value: "both", label: "Open to both" },
             ]}
           />
+        </div>
 
-          <TextArea
-            label="Any travel history you'd like to share?"
-            name="history"
-            value={form.history}
-            onChange={update}
-            placeholder="Places you've been, best memories, bucket list destinations..."
-            rows={4}
-          />
+        {/* ── 12. Final Consent ── */}
+        <div className="section-card space-y-4">
+          <SectionTitle icon={<FiCheck size={15} />} title="Final Consent" />
+
+          <div className="space-y-4">
+            <div data-error={errors.consentAgreed ? true : undefined}>
+              <CheckboxField
+                name="consentAgreed"
+                label="I agree to the pricing & policies"
+                checked={form.consentAgreed}
+                onChange={update}
+              />
+              {errors.consentAgreed && (
+                <p className="text-red-500 text-xs mt-1 flex items-center gap-1">
+                  <FiAlertCircle size={10} /> {errors.consentAgreed}
+                </p>
+              )}
+            </div>
+
+            <div data-error={errors.consentFormat ? true : undefined}>
+              <CheckboxField
+                name="consentFormat"
+                label="I understand the experience format"
+                checked={form.consentFormat}
+                onChange={update}
+              />
+              {errors.consentFormat && (
+                <p className="text-red-500 text-xs mt-1 flex items-center gap-1">
+                  <FiAlertCircle size={10} /> {errors.consentFormat}
+                </p>
+              )}
+            </div>
+          </div>
         </div>
 
         {/* ── Submit ── */}

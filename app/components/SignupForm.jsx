@@ -36,6 +36,10 @@ const LANGUAGES = [
   "Gujarati",
 ];
 
+function Label({ children }) {
+  return <label className="field-label">{children}</label>;
+}
+
 function SelectInput({
   label,
   icon,
@@ -47,10 +51,10 @@ function SelectInput({
 }) {
   return (
     <div>
-      {label && <label className="field-label">{label}</label>}
+      {label && <Label>{label}</Label>}
       <div className="relative">
         {icon && (
-          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-coffee-400 text-base pointer-events-none">
+          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-coffee-400 pointer-events-none">
             {icon}
           </span>
         )}
@@ -83,10 +87,10 @@ function TextInput({
 }) {
   return (
     <div>
-      {label && <label className="field-label">{label}</label>}
+      {label && <Label>{label}</Label>}
       <div className="relative">
         {icon && (
-          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-coffee-400 text-base pointer-events-none">
+          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-coffee-400 pointer-events-none">
             {icon}
           </span>
         )}
@@ -105,7 +109,7 @@ function TextInput({
 function TextArea({ label, name, value, onChange, placeholder, rows = 3 }) {
   return (
     <div>
-      {label && <label className="field-label">{label}</label>}
+      {label && <Label>{label}</Label>}
       <textarea
         rows={rows}
         value={value || ""}
@@ -117,16 +121,16 @@ function TextArea({ label, name, value, onChange, placeholder, rows = 3 }) {
   );
 }
 
-function SectionHeader({ icon, title, subtitle }) {
+function SectionTitle({ icon, title, subtitle }) {
   return (
-    <div className="flex items-start gap-3 mb-5">
-      <div className="w-9 h-9 rounded-xl bg-coffee-100 flex items-center justify-center text-coffee-600 text-lg shrink-0 mt-0.5">
+    <div className="flex items-center gap-2 mb-4 pb-3 border-b border-coffee-100">
+      <div className="w-8 h-8 rounded-lg bg-coffee-100 flex items-center justify-center text-coffee-600 shrink-0">
         {icon}
       </div>
       <div>
-        <h2 className="text-base font-bold text-charcoal">{title}</h2>
+        <p className="text-sm font-bold text-charcoal">{title}</p>
         {subtitle && (
-          <p className="text-xs text-coffee-500 mt-0.5">{subtitle}</p>
+          <p className="text-xs text-coffee-400 mt-0.5">{subtitle}</p>
         )}
       </div>
     </div>
@@ -144,7 +148,7 @@ function LanguageSelector({ selected, onChange }) {
 
   return (
     <div>
-      <label className="field-label">Languages you speak</label>
+      <Label>Languages you speak</Label>
       <div className="flex flex-wrap gap-2 mt-1">
         {LANGUAGES.map((lang) => {
           const isSelected = (selected || []).includes(lang);
@@ -168,29 +172,9 @@ function LanguageSelector({ selected, onChange }) {
   );
 }
 
-function StepIndicator({ current, total }) {
-  return (
-    <div className="flex items-center gap-1.5 justify-center">
-      {Array.from({ length: total }).map((_, i) => (
-        <div
-          key={i}
-          className={`h-1.5 rounded-full transition-all duration-300 ${
-            i < current
-              ? "bg-coffee-500 w-5"
-              : i === current
-                ? "bg-coffee-400 w-8"
-                : "bg-coffee-200 w-5"
-          }`}
-        />
-      ))}
-    </div>
-  );
-}
-
 export default function SignupForm() {
   const router = useRouter();
   const [form, setForm] = useState({});
-  const [step, setStep] = useState(0);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
 
@@ -199,31 +183,22 @@ export default function SignupForm() {
     setErrors((prev) => ({ ...prev, [key]: undefined }));
   };
 
-  const validateStep = () => {
+  const validate = () => {
     const errs = {};
-    if (step === 0) {
-      if (!form.name?.trim()) errs.name = "Required";
-      if (!form.phone?.trim()) errs.phone = "Required";
-      if (!form.city?.trim()) errs.city = "Required";
-    }
+    if (!form.name?.trim()) errs.name = "Name is required";
+    if (!form.phone?.trim()) errs.phone = "Phone is required";
+    if (!form.city?.trim()) errs.city = "City is required";
     setErrors(errs);
+    if (Object.keys(errs).length > 0) {
+      // scroll to first error
+      const first = document.querySelector(".error-msg");
+      if (first) first.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
     return Object.keys(errs).length === 0;
   };
 
-  const TOTAL_STEPS = 4;
-
-  const handleNext = () => {
-    if (!validateStep()) return;
-    setStep((s) => Math.min(s + 1, TOTAL_STEPS - 1));
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  };
-
-  const handleBack = () => {
-    setStep((s) => Math.max(s - 1, 0));
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  };
-
   const handleSubmit = async () => {
+    if (!validate()) return;
     setLoading(true);
     try {
       const res = await fetch("/api/signup", {
@@ -237,484 +212,367 @@ export default function SignupForm() {
       } else {
         alert("Something went wrong. Please try again.");
       }
-    } catch (e) {
+    } catch {
       alert("Network error. Please try again.");
     }
     setLoading(false);
   };
 
   return (
-    <div className="min-h-screen bg-cream">
-      {/* Header */}
-      <div className="sticky top-0 z-10 bg-white/80 backdrop-blur border-b border-coffee-100">
-        <div className="max-w-lg mx-auto px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <MdOutlineCoffee className="text-coffee-600 text-xl" />
-            <span className="font-bold text-coffee-800 text-base">
-              CoffeeToTrips
-            </span>
-          </div>
-          <StepIndicator current={step} total={TOTAL_STEPS} />
-          <span className="text-xs text-coffee-500 font-medium">
-            {step + 1} / {TOTAL_STEPS}
-          </span>
-        </div>
+    <div className="max-w-xl mx-auto px-4 py-10 space-y-5">
+      {/* Hero */}
+      <div className="text-center pb-2">
+        <p className="text-4xl mb-3">☕</p>
+        <h1 className="text-2xl font-bold text-charcoal">Join CoffeeToTrip</h1>
+        <p className="text-sm text-coffee-500 mt-1 max-w-sm mx-auto">
+          Fill in your profile below. We'll manually match you with your ideal
+          travel crew.
+        </p>
       </div>
 
-      <div className="max-w-lg mx-auto px-4 py-6 space-y-4">
-        {/* ─── STEP 0: About You ─── */}
-        {step === 0 && (
-          <>
-            <div className="text-center py-4">
-              <p className="text-3xl mb-2">☕</p>
-              <h1 className="text-2xl font-bold text-charcoal">
-                Let's get you started
-              </h1>
-              <p className="text-sm text-coffee-500 mt-1">
-                Basic details first. Quick & easy.
-              </p>
-            </div>
+      {/* ── 1. Basic Info ── */}
+      <div className="section-card space-y-4">
+        <SectionTitle
+          icon={<FiUser size={15} />}
+          title="Basic Info"
+          subtitle="Tell us who you are."
+        />
 
-            <div className="section-card space-y-4">
-              <SectionHeader icon={<FiUser />} title="About You" />
-
-              <TextInput
-                label="Full Name"
-                icon={<FiUser className="text-sm" />}
-                name="name"
-                value={form.name}
-                onChange={update}
-                placeholder="Your full name"
-              />
-              {errors.name && (
-                <p className="text-red-500 text-xs -mt-2">{errors.name}</p>
-              )}
-
-              <TextInput
-                label="Phone Number"
-                icon={<FiPhone className="text-sm" />}
-                name="phone"
-                value={form.phone}
-                onChange={update}
-                placeholder="+91 98765 43210"
-                type="tel"
-              />
-              {errors.phone && (
-                <p className="text-red-500 text-xs -mt-2">{errors.phone}</p>
-              )}
-
-              <div className="grid grid-cols-2 gap-3">
-                <TextInput
-                  label="Age"
-                  name="age"
-                  value={form.age}
-                  onChange={update}
-                  placeholder="25"
-                  type="number"
-                />
-                <SelectInput
-                  label="Gender"
-                  name="gender"
-                  value={form.gender}
-                  onChange={update}
-                  placeholder="Select"
-                  options={[
-                    "Male",
-                    "Female",
-                    "Non-binary",
-                    "Prefer not to say",
-                  ]}
-                />
-              </div>
-
-              <TextInput
-                label="City"
-                icon={<FiMapPin className="text-sm" />}
-                name="city"
-                value={form.city}
-                onChange={update}
-                placeholder="Where are you based?"
-              />
-              {errors.city && (
-                <p className="text-red-500 text-xs -mt-2">{errors.city}</p>
-              )}
-
-              <TextInput
-                label="Profession"
-                icon={<FiBriefcase className="text-sm" />}
-                name="profession"
-                value={form.profession}
-                onChange={update}
-                placeholder="What do you do?"
-              />
-
-              <LanguageSelector selected={form.languages} onChange={update} />
-            </div>
-          </>
+        <TextInput
+          label="Full Name *"
+          icon={<FiUser size={14} />}
+          name="name"
+          value={form.name}
+          onChange={update}
+          placeholder="Your full name"
+        />
+        {errors.name && (
+          <p className="error-msg text-red-500 text-xs -mt-2">{errors.name}</p>
         )}
 
-        {/* ─── STEP 1: Participation & Lifestyle ─── */}
-        {step === 1 && (
-          <>
-            <div className="text-center py-4">
-              <p className="text-3xl mb-2">🎟️</p>
-              <h1 className="text-2xl font-bold text-charcoal">
-                Participation & Lifestyle
-              </h1>
-              <p className="text-sm text-coffee-500 mt-1">
-                Help us understand your travel style.
-              </p>
-            </div>
-
-            <div className="section-card space-y-4">
-              <SectionHeader
-                icon={<FiHeart />}
-                title="Participation Type"
-                subtitle="How are you joining this trip?"
-              />
-
-              <SelectInput
-                label="How are you joining?"
-                name="participationType"
-                value={form.participationType}
-                onChange={update}
-                options={[
-                  { value: "self", label: "Self-funded (paying myself)" },
-                  {
-                    value: "co-sponsor",
-                    label: "Co-sponsor (split with someone)",
-                  },
-                  {
-                    value: "sponsored",
-                    label: "Sponsored (looking for sponsor)",
-                  },
-                ]}
-              />
-
-              {form.participationType === "sponsored" && (
-                <TextArea
-                  label="Why should we consider you for sponsorship?"
-                  name="sponsorReason"
-                  value={form.sponsorReason}
-                  onChange={update}
-                  placeholder="Tell us about yourself and why you'd be a great travel companion..."
-                  rows={4}
-                />
-              )}
-
-              {form.participationType === "co-sponsor" && (
-                <SelectInput
-                  label="Co-sponsor gender preference"
-                  name="sponsorPreference"
-                  value={form.sponsorPreference}
-                  onChange={update}
-                  options={["Male", "Female", "No preference"]}
-                />
-              )}
-            </div>
-
-            <div className="section-card space-y-4">
-              <SectionHeader
-                icon={<MdOutlineLocalBar />}
-                title="Lifestyle"
-                subtitle="Be honest — it helps with better matching."
-              />
-
-              <SelectInput
-                label="Drinking"
-                icon={<MdOutlineLocalBar />}
-                name="drinking"
-                value={form.drinking}
-                onChange={update}
-                options={[
-                  { value: "no", label: "Don't drink" },
-                  { value: "social", label: "Social drinker" },
-                  { value: "occasional", label: "Occasional" },
-                  { value: "regular", label: "Regular" },
-                ]}
-              />
-
-              <SelectInput
-                label="Smoking"
-                icon={<MdOutlineSmokingRooms />}
-                name="smoking"
-                value={form.smoking}
-                onChange={update}
-                options={[
-                  { value: "non-smoker", label: "Non-smoker" },
-                  { value: "smoker", label: "Smoker" },
-                  { value: "prefer-non", label: "Prefer non-smoking company" },
-                ]}
-              />
-
-              <SelectInput
-                label="Food preference"
-                icon={<MdOutlineFastfood />}
-                name="food"
-                value={form.food}
-                onChange={update}
-                options={[
-                  "Vegetarian",
-                  "Vegan",
-                  "Non-vegetarian",
-                  "Jain",
-                  "No preference",
-                ]}
-              />
-            </div>
-          </>
+        <TextInput
+          label="Phone Number *"
+          icon={<FiPhone size={14} />}
+          name="phone"
+          value={form.phone}
+          onChange={update}
+          placeholder="+91 98765 43210"
+          type="tel"
+        />
+        {errors.phone && (
+          <p className="error-msg text-red-500 text-xs -mt-2">{errors.phone}</p>
         )}
 
-        {/* ─── STEP 2: Personality & Group ─── */}
-        {step === 2 && (
-          <>
-            <div className="text-center py-4">
-              <p className="text-3xl mb-2">🧩</p>
-              <h1 className="text-2xl font-bold text-charcoal">
-                Vibe & Group Fit
-              </h1>
-              <p className="text-sm text-coffee-500 mt-1">
-                What kind of traveller are you?
-              </p>
-            </div>
-
-            <div className="section-card space-y-4">
-              <SectionHeader
-                icon={<FiUsers />}
-                title="Personality"
-                subtitle="Pick what describes you best."
-              />
-
-              <SelectInput
-                label="Your personality type"
-                name="personality"
-                value={form.personality}
-                onChange={update}
-                options={[
-                  "Introvert — need quiet time to recharge",
-                  "Extrovert — energised by people",
-                  "Ambivert — depends on the mood",
-                  "The planner — always has an itinerary",
-                  "The free spirit — goes with the flow",
-                ]}
-              />
-
-              <SelectInput
-                label="Conversation style"
-                name="conversation"
-                value={form.conversation}
-                onChange={update}
-                options={[
-                  "Deep talks — philosophy, life",
-                  "Light & fun — memes, travel stories",
-                  "Mostly listen, occasionally share",
-                  "Whatever the vibe calls for",
-                ]}
-              />
-            </div>
-
-            <div className="section-card space-y-4">
-              <SectionHeader
-                icon={<MdOutlineGroup />}
-                title="Group Preference"
-              />
-
-              <SelectInput
-                label="What group type are you comfortable with?"
-                name="groupPreference"
-                value={form.groupPreference}
-                onChange={update}
-                options={[
-                  { value: "all-men", label: "All men" },
-                  { value: "all-women", label: "All women" },
-                  { value: "mixed", label: "Mixed group" },
-                  { value: "couples", label: "Couples only" },
-                  { value: "no-preference", label: "No preference" },
-                ]}
-              />
-
-              {form.groupPreference === "couples" && (
-                <TextInput
-                  label="Partner's Name"
-                  icon={<FiHeart className="text-sm" />}
-                  name="partnerName"
-                  value={form.partnerName}
-                  onChange={update}
-                  placeholder="Your partner's full name"
-                />
-              )}
-            </div>
-          </>
-        )}
-
-        {/* ─── STEP 3: Trip Details ─── */}
-        {step === 3 && (
-          <>
-            <div className="text-center py-4">
-              <p className="text-3xl mb-2">✈️</p>
-              <h1 className="text-2xl font-bold text-charcoal">Trip Details</h1>
-              <p className="text-sm text-coffee-500 mt-1">
-                Tell us your travel intent and budget.
-              </p>
-            </div>
-
-            <div className="section-card space-y-4">
-              <SectionHeader
-                icon={<MdOutlineDirectionsBus />}
-                title="Trip Intent"
-              />
-
-              <SelectInput
-                label="Are you open to going on a trip?"
-                name="tripIntent"
-                value={form.tripIntent}
-                onChange={update}
-                options={[
-                  { value: "yes", label: "Yes — let's go!" },
-                  { value: "maybe", label: "Maybe — depends on the group" },
-                  {
-                    value: "no",
-                    label: "Not right now — just here for coffee meetups",
-                  },
-                ]}
-              />
-
-              {(form.tripIntent === "yes" || form.tripIntent === "maybe") && (
-                <>
-                  <SelectInput
-                    label="Trip type preference"
-                    name="tripType"
-                    value={form.tripType}
-                    onChange={update}
-                    options={[
-                      { value: "local", label: "Local (day trip / weekend)" },
-                      { value: "domestic", label: "Domestic (within India)" },
-                      { value: "international", label: "International" },
-                      { value: "any", label: "Open to anything" },
-                    ]}
-                  />
-
-                  <SelectInput
-                    label="Budget per trip (approx.)"
-                    name="budget"
-                    value={form.budget}
-                    onChange={update}
-                    options={[
-                      { value: "5k-10k", label: "₹5,000 – ₹10,000" },
-                      { value: "10k-30k", label: "₹10,000 – ₹30,000" },
-                      { value: "30k-1L", label: "₹30,000 – ₹1,00,000" },
-                      { value: "1L+", label: "₹1,00,000+" },
-                    ]}
-                  />
-
-                  <SelectInput
-                    label="When are you ready?"
-                    name="readiness"
-                    value={form.readiness}
-                    onChange={update}
-                    options={[
-                      {
-                        value: "immediate",
-                        label: "Immediately — let's plan now",
-                      },
-                      { value: "1month", label: "Within a month" },
-                      { value: "3months", label: "Next 3 months" },
-                      {
-                        value: "flexible",
-                        label: "Flexible — whenever it happens",
-                      },
-                    ]}
-                  />
-                </>
-              )}
-            </div>
-
-            <div className="section-card space-y-4">
-              <SectionHeader
-                icon={<FiGlobe />}
-                title="Final Words"
-                subtitle="Optional but helpful."
-              />
-
-              <SelectInput
-                label="Your primary intent for joining"
-                name="intent"
-                value={form.intent}
-                onChange={update}
-                options={[
-                  "Just looking to make travel friends",
-                  "Find a consistent travel buddy",
-                  "Social meetups first, trips later",
-                  "Serious about planning a trip ASAP",
-                ]}
-              />
-
-              <TextArea
-                label="Any travel history you'd like to share?"
-                name="history"
-                value={form.history}
-                onChange={update}
-                placeholder="Places you've been, best travel memories, bucket list destinations..."
-                rows={4}
-              />
-            </div>
-
-            {/* Summary card */}
-            <div className="bg-coffee-50 border border-coffee-200 rounded-2xl p-4">
-              <p className="text-xs font-semibold text-coffee-700 mb-2 uppercase tracking-wide">
-                Your Summary
-              </p>
-              <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs text-coffee-800">
-                {form.name && <span>👤 {form.name}</span>}
-                {form.city && <span>📍 {form.city}</span>}
-                {form.age && <span>🎂 {form.age} yrs</span>}
-                {form.gender && <span>⚧ {form.gender}</span>}
-                {form.tripIntent && <span>✈️ Trip: {form.tripIntent}</span>}
-                {form.budget && <span>💰 {form.budget}</span>}
-              </div>
-            </div>
-          </>
-        )}
-
-        {/* Navigation Buttons */}
-        <div
-          className={`flex gap-3 pt-2 ${step === 0 ? "justify-end" : "justify-between"}`}
-        >
-          {step > 0 && (
-            <button
-              onClick={handleBack}
-              className="flex-1 bg-white border border-coffee-200 text-coffee-700 font-semibold py-4 px-6 rounded-xl hover:bg-coffee-50 transition-all duration-200 text-sm"
-            >
-              ← Back
-            </button>
-          )}
-
-          {step < TOTAL_STEPS - 1 ? (
-            <button onClick={handleNext} className="btn-primary flex-1">
-              Continue →
-            </button>
-          ) : (
-            <button
-              onClick={handleSubmit}
-              disabled={loading}
-              className="btn-primary flex-1 disabled:opacity-60 disabled:cursor-not-allowed"
-            >
-              {loading ? (
-                <>
-                  <FiLoader className="animate-spin" />
-                  Submitting...
-                </>
-              ) : (
-                <>
-                  <FiSend />
-                  Book My Slot
-                </>
-              )}
-            </button>
-          )}
+        <div className="grid grid-cols-2 gap-3">
+          <TextInput
+            label="Age"
+            name="age"
+            value={form.age}
+            onChange={update}
+            placeholder="25"
+            type="number"
+          />
+          <SelectInput
+            label="Gender"
+            name="gender"
+            value={form.gender}
+            onChange={update}
+            placeholder="Select"
+            options={["Male", "Female", "Non-binary", "Prefer not to say"]}
+          />
         </div>
 
-        <p className="text-center text-xs text-coffee-400 pb-6">
+        <TextInput
+          label="City *"
+          icon={<FiMapPin size={14} />}
+          name="city"
+          value={form.city}
+          onChange={update}
+          placeholder="Where are you based?"
+        />
+        {errors.city && (
+          <p className="error-msg text-red-500 text-xs -mt-2">{errors.city}</p>
+        )}
+
+        <TextInput
+          label="Profession"
+          icon={<FiBriefcase size={14} />}
+          name="profession"
+          value={form.profession}
+          onChange={update}
+          placeholder="What do you do?"
+        />
+
+        <LanguageSelector selected={form.languages} onChange={update} />
+      </div>
+
+      {/* ── 2. Participation ── */}
+      <div className="section-card space-y-4">
+        <SectionTitle
+          icon={<FiHeart size={15} />}
+          title="Participation Type"
+          subtitle="How are you joining?"
+        />
+
+        <SelectInput
+          label="How are you joining?"
+          name="participationType"
+          value={form.participationType}
+          onChange={update}
+          options={[
+            { value: "self", label: "Self-funded (paying myself)" },
+            { value: "co-sponsor", label: "Co-sponsor (split with someone)" },
+            { value: "sponsored", label: "Sponsored (looking for sponsor)" },
+          ]}
+        />
+
+        {form.participationType === "sponsored" && (
+          <TextArea
+            label="Why should we consider you for sponsorship?"
+            name="sponsorReason"
+            value={form.sponsorReason}
+            onChange={update}
+            placeholder="Tell us about yourself and why you'd be a great travel companion..."
+            rows={4}
+          />
+        )}
+
+        {form.participationType === "co-sponsor" && (
+          <SelectInput
+            label="Co-sponsor gender preference"
+            name="sponsorPreference"
+            value={form.sponsorPreference}
+            onChange={update}
+            options={["Male", "Female", "No preference"]}
+          />
+        )}
+      </div>
+
+      {/* ── 3. Lifestyle ── */}
+      <div className="section-card space-y-4">
+        <SectionTitle
+          icon={<MdOutlineLocalBar size={15} />}
+          title="Lifestyle"
+          subtitle="Be honest — it helps with better matching."
+        />
+
+        <SelectInput
+          label="Drinking"
+          icon={<MdOutlineLocalBar size={14} />}
+          name="drinking"
+          value={form.drinking}
+          onChange={update}
+          options={[
+            { value: "no", label: "Don't drink" },
+            { value: "social", label: "Social drinker" },
+            { value: "occasional", label: "Occasional" },
+            { value: "regular", label: "Regular" },
+          ]}
+        />
+
+        <SelectInput
+          label="Smoking"
+          icon={<MdOutlineSmokingRooms size={14} />}
+          name="smoking"
+          value={form.smoking}
+          onChange={update}
+          options={[
+            { value: "non-smoker", label: "Non-smoker" },
+            { value: "smoker", label: "Smoker" },
+            { value: "prefer-non", label: "Prefer non-smoking company" },
+          ]}
+        />
+
+        <SelectInput
+          label="Food preference"
+          icon={<MdOutlineFastfood size={14} />}
+          name="food"
+          value={form.food}
+          onChange={update}
+          options={[
+            "Vegetarian",
+            "Vegan",
+            "Non-vegetarian",
+            "Jain",
+            "No preference",
+          ]}
+        />
+      </div>
+
+      {/* ── 4. Personality & Group ── */}
+      <div className="section-card space-y-4">
+        <SectionTitle
+          icon={<FiUsers size={15} />}
+          title="Vibe & Group Fit"
+          subtitle="What kind of traveller are you?"
+        />
+
+        <SelectInput
+          label="Personality type"
+          name="personality"
+          value={form.personality}
+          onChange={update}
+          options={[
+            "Introvert — need quiet time to recharge",
+            "Extrovert — energised by people",
+            "Ambivert — depends on the mood",
+            "The planner — always has an itinerary",
+            "The free spirit — goes with the flow",
+          ]}
+        />
+
+        <SelectInput
+          label="Conversation style"
+          name="conversation"
+          value={form.conversation}
+          onChange={update}
+          options={[
+            "Deep talks — philosophy, life",
+            "Light & fun — memes, travel stories",
+            "Mostly listen, occasionally share",
+            "Whatever the vibe calls for",
+          ]}
+        />
+
+        <SelectInput
+          label="Group type preference"
+          name="groupPreference"
+          value={form.groupPreference}
+          onChange={update}
+          options={[
+            { value: "all-men", label: "All men" },
+            { value: "all-women", label: "All women" },
+            { value: "mixed", label: "Mixed group" },
+            { value: "couples", label: "Couples only" },
+            { value: "no-preference", label: "No preference" },
+          ]}
+        />
+
+        {form.groupPreference === "couples" && (
+          <TextInput
+            label="Partner's Name"
+            icon={<FiHeart size={14} />}
+            name="partnerName"
+            value={form.partnerName}
+            onChange={update}
+            placeholder="Your partner's full name"
+          />
+        )}
+      </div>
+
+      {/* ── 5. Trip Details ── */}
+      <div className="section-card space-y-4">
+        <SectionTitle
+          icon={<MdOutlineDirectionsBus size={15} />}
+          title="Trip Details"
+          subtitle="Tell us your travel intent and budget."
+        />
+
+        <SelectInput
+          label="Are you open to going on a trip?"
+          name="tripIntent"
+          value={form.tripIntent}
+          onChange={update}
+          options={[
+            { value: "yes", label: "Yes — let's go!" },
+            { value: "maybe", label: "Maybe — depends on the group" },
+            { value: "no", label: "Not right now — just coffee meetups" },
+          ]}
+        />
+
+        {(form.tripIntent === "yes" || form.tripIntent === "maybe") && (
+          <>
+            <SelectInput
+              label="Trip type preference"
+              name="tripType"
+              value={form.tripType}
+              onChange={update}
+              options={[
+                { value: "local", label: "Local (day trip / weekend)" },
+                { value: "domestic", label: "Domestic (within India)" },
+                { value: "international", label: "International" },
+                { value: "any", label: "Open to anything" },
+              ]}
+            />
+
+            <SelectInput
+              label="Budget per trip (approx.)"
+              name="budget"
+              value={form.budget}
+              onChange={update}
+              options={[
+                { value: "5k-10k", label: "₹5,000 – ₹10,000" },
+                { value: "10k-30k", label: "₹10,000 – ₹30,000" },
+                { value: "30k-1L", label: "₹30,000 – ₹1,00,000" },
+                { value: "1L+", label: "₹1,00,000+" },
+              ]}
+            />
+
+            <SelectInput
+              label="When are you ready?"
+              name="readiness"
+              value={form.readiness}
+              onChange={update}
+              options={[
+                { value: "immediate", label: "Immediately — let's plan now" },
+                { value: "1month", label: "Within a month" },
+                { value: "3months", label: "Next 3 months" },
+                { value: "flexible", label: "Flexible — whenever it happens" },
+              ]}
+            />
+          </>
+        )}
+      </div>
+
+      {/* ── 6. Final Words ── */}
+      <div className="section-card space-y-4">
+        <SectionTitle
+          icon={<FiGlobe size={15} />}
+          title="Final Words"
+          subtitle="Optional but helpful."
+        />
+
+        <SelectInput
+          label="Your primary intent for joining"
+          name="intent"
+          value={form.intent}
+          onChange={update}
+          options={[
+            "Just looking to make travel friends",
+            "Find a consistent travel buddy",
+            "Social meetups first, trips later",
+            "Serious about planning a trip ASAP",
+          ]}
+        />
+
+        <TextArea
+          label="Any travel history you'd like to share?"
+          name="history"
+          value={form.history}
+          onChange={update}
+          placeholder="Places you've been, best travel memories, bucket list destinations..."
+          rows={4}
+        />
+      </div>
+
+      {/* ── Submit ── */}
+      <div className="pt-2 pb-8">
+        <button
+          onClick={handleSubmit}
+          disabled={loading}
+          className="btn-primary disabled:opacity-60 disabled:cursor-not-allowed"
+        >
+          {loading ? (
+            <>
+              <FiLoader className="animate-spin" /> Submitting...
+            </>
+          ) : (
+            <>
+              <FiSend /> Book My Slot
+            </>
+          )}
+        </button>
+        <p className="text-center text-xs text-coffee-400 mt-3">
           By submitting, you agree to be contacted on WhatsApp for group
           updates.
         </p>

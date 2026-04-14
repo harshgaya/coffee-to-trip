@@ -686,11 +686,14 @@ export default function SignupForm() {
         {/* Hero */}
         <div className="text-center pb-2">
           {/* <p className="text-4xl mb-3">☕</p> */}
-          <h1 className="text-2xl font-bold text-stone-800 mt-5">
+          <h1 className="text-2xl font-semibold text-stone-800 mt-5">
             Meet New People Over Coffee ☕
           </h1>
-          <p className="text-sm text-stone-500 mt-1 max-w-xs mx-auto leading-relaxed">
-            Travel if it clicks ✈️ ·curated groups · Real. No pressure.
+          <h1 className="text-2xl font-medium text-stone-800 mt-1">
+            Travel if it clicks ✈️
+          </h1>
+          <p className="text-md text-stone-500 mt-1 max-w-xs mx-auto leading-relaxed">
+            curated groups · Real. No pressure.
           </p>
         </div>
 

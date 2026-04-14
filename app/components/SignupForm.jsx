@@ -1032,9 +1032,9 @@ export default function SignupForm() {
             value={form.groupPreference}
             onChange={update}
             options={[
-              { value: "all-men", label: "All men" },
-              { value: "all-women", label: "All women" },
-              { value: "mixed", label: "Mixed" },
+              { value: "all-men", label: "Only men" },
+              { value: "all-women", label: "Only women" },
+              { value: "mixed", label: "Both Men and Women" },
               { value: "couples", label: "Couples only" },
             ]}
           />

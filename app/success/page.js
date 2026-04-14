@@ -2,7 +2,7 @@ import Link from "next/link";
 import { MdOutlineCoffee } from "react-icons/md";
 
 export const metadata = {
-  title: "You're in! — CoffeeToTrip",
+  title: "You're in! — CoffeeToTrips",
 };
 
 export default function SuccessPage() {
@@ -19,7 +19,7 @@ export default function SuccessPage() {
         </h1>
 
         <p className="text-coffee-600 text-base mb-2">
-          Thanks for signing up with <strong>CoffeeToTrip</strong>.
+          Thanks for signing up with <strong>CoffeeToTrips</strong>.
         </p>
 
         <p className="text-coffee-500 text-sm mb-8 leading-relaxed">

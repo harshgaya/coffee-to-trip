@@ -109,6 +109,27 @@ const FAQS = [
       },
     ],
   },
+  {
+    category: "Scheduling",
+    items: [
+      {
+        q: "When will my coffee meetup be scheduled?",
+        a: "Your coffee experience is not fixed in advance. We finalise the date and time based on group curation, availability, and balanced participation. You will be informed 2–3 days prior via WhatsApp or phone.",
+      },
+      {
+        q: "Why is there no fixed date?",
+        a: "CoffeeToTrips focuses on creating the right group, not just filling slots. Scheduling depends on signups, compatibility, and gender balance to ensure a comfortable and meaningful experience.",
+      },
+      {
+        q: "What happens after I book?",
+        a: "Your booking remains valid and is assigned to the next suitable curated group. Once your group is finalised, you will receive all details including date, time, and location.",
+      },
+      {
+        q: "Can I cancel or get a refund if the date is delayed?",
+        a: "No. Since this is a curated experience and not a fixed-time event, delays may occur to ensure quality. Bookings are non-refundable and non-cancellable.",
+      },
+    ],
+  },
 ];
 
 function FAQItem({ q, a }) {

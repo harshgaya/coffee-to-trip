@@ -190,7 +190,7 @@ function SubmitOverlay({ state, retryCount, onRetry, onReset }) {
                 "We review your profile & preferences",
                 "We match you with compatible travellers",
                 "You get a WhatsApp message from us",
-                "Coffee meetup → Group trip planning",
+                "Coffee meetup → Group trips planning",
               ].map((step, i) => (
                 <div key={i} className="flex items-start gap-3">
                   <div className="w-5 h-5 rounded-full bg-coffee-600 text-white text-xs font-bold flex items-center justify-center shrink-0 mt-0.5">

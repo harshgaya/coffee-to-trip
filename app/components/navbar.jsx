@@ -8,7 +8,7 @@ export default function Navbar() {
         <Link href="/" className="flex items-center gap-2">
           <MdOutlineCoffee className="text-coffee-600 text-2xl" />
           <span className="font-bold text-coffee-800 text-base">
-            CoffeeToTrip
+            CoffeeToTrips
           </span>
         </Link>
         <div className="flex items-center gap-5 text-sm font-medium text-coffee-700">

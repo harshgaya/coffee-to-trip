@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 export const metadata = {
-  title: "Terms & Policies — CoffeeToTrip",
+  title: "Terms & Policies — CoffeeToTrips",
 };
 
 const sections = [
@@ -15,7 +15,7 @@ const sections = [
   },
   {
     title: "3. Platform Cancellation Rights",
-    body: `CoffeeToTrip reserves the right to cancel or decline any booking at its discretion, including after payment. In such cases, a 100% refund will be issued to the original payment method. This may occur due to safety concerns, group balance, operational reasons, or internal curation decisions. No additional explanation is required for such decisions.`,
+    body: `CoffeeToTrips reserves the right to cancel or decline any booking at its discretion, including after payment. In such cases, a 100% refund will be issued to the original payment method. This may occur due to safety concerns, group balance, operational reasons, or internal curation decisions. No additional explanation is required for such decisions.`,
   },
   {
     title: "4. Rescheduling",
@@ -31,7 +31,7 @@ const sections = [
   },
   {
     title: "7. Group Curation",
-    body: `All groups are manually curated by the CoffeeToTrip team. Group composition is based on preferences, compatibility, and availability. Exact matches or expectations are not guaranteed.`,
+    body: `All groups are manually curated by the CoffeeToTrips team. Group composition is based on preferences, compatibility, and availability. Exact matches or expectations are not guaranteed.`,
   },
   {
     title: "8. Sponsorship",
@@ -39,7 +39,7 @@ const sections = [
   },
   {
     title: "9. Liability",
-    body: `CoffeeToTrip facilitates social experiences only. Any interactions or travel decisions after the meetup are at the participants' own discretion and responsibility. CoffeeToTrip is not liable for any incidents, losses, injuries, or damages that occur during or after the meetup.`,
+    body: `CoffeeToTrips facilitates social experiences only. Any interactions or travel decisions after the meetup are at the participants' own discretion and responsibility. CoffeeToTrips is not liable for any incidents, losses, injuries, or damages that occur during or after the meetup.`,
   },
   {
     title: "10. Agreement",

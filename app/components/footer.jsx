@@ -11,11 +11,11 @@ export default function Footer() {
           <div>
             <div className="flex items-center gap-2 mb-3">
               <MdOutlineCoffee className="text-coffee-600 text-xl" />
-              <span className="font-bold text-coffee-800">CoffeeToTrip</span>
+              <span className="font-bold text-coffee-800">CoffeeToTrips</span>
             </div>
             <p className="text-xs text-coffee-500 leading-relaxed">
               A curated community where travel-loving strangers become lifelong
-              friends. Coffee first. Trip next.
+              friends. Coffee first. Trips next.
             </p>
             <div className="flex items-center gap-3 mt-4">
               <a
@@ -81,7 +81,7 @@ export default function Footer() {
 
         <div className="border-t border-coffee-100 pt-5 flex flex-col sm:flex-row items-center justify-between gap-2">
           <p className="text-xs text-coffee-400">
-            © {new Date().getFullYear()} CoffeeToTrip. All rights reserved.
+            © {new Date().getFullYear()} CoffeeToTrips. All rights reserved.
           </p>
           <div className="flex items-center gap-4">
             <Link

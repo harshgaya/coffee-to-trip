@@ -5,18 +5,18 @@ import { FiChevronDown, FiChevronUp } from "react-icons/fi";
 
 const FAQS = [
   {
-    category: "About CoffeeToTrip",
+    category: "About CoffeeToTrips",
     items: [
       {
-        q: "What is CoffeeToTrip?",
-        a: "CoffeeToTrip is a curated experience where you meet new people over coffee in small groups. If the group connects well, you can plan a trip together.",
+        q: "What is CoffeeToTrips?",
+        a: "CoffeeToTrips is a curated experience where you meet new people over coffee in small groups. If the group connects well, you can plan a trip together.",
       },
       {
         q: "Is this a dating platform?",
         a: "No. This is a curated social experience focused on meeting new people and exploring travel opportunities.",
       },
       {
-        q: "How does CoffeeToTrip work?",
+        q: "How does CoffeeToTrips work?",
         a: "You book a slot → we match you with a group of people → you meet at a café → if it clicks, you may plan a trip together.",
       },
       {

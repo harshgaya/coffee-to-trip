@@ -77,7 +77,6 @@ function useNetworkStatus() {
 
 function StickySaveBar({ status, online, onRetry, onClear, hasData }) {
   const visible = !online || !!status;
-
   let content = null;
   if (!online) {
     content = (
@@ -121,7 +120,6 @@ function StickySaveBar({ status, online, onRetry, onClear, hasData }) {
       </div>
     );
   }
-
   return (
     <div
       className={`fixed top-[53px] left-0 right-0 z-40 transition-all duration-300 ${
@@ -169,7 +167,6 @@ function SubmitOverlay({ state, retryCount, onRetry, onReset }) {
       </div>
     );
   }
-
   if (state === "success") {
     return (
       <div className="fixed inset-0 bg-cream z-50 flex items-center justify-center px-6">
@@ -211,7 +208,6 @@ function SubmitOverlay({ state, retryCount, onRetry, onReset }) {
       </div>
     );
   }
-
   if (state === "failed") {
     return (
       <div className="fixed inset-0 bg-cream/95 backdrop-blur-sm z-50 flex items-center justify-center px-6">
@@ -233,7 +229,6 @@ function SubmitOverlay({ state, retryCount, onRetry, onReset }) {
       </div>
     );
   }
-
   return null;
 }
 
@@ -277,9 +272,7 @@ function TextInput({
           value={value || ""}
           placeholder={placeholder || label}
           onChange={(e) => onChange(name, e.target.value)}
-          className={`field-input ${icon ? "pl-9" : ""} ${
-            error ? "border-red-400 focus:ring-red-400" : ""
-          }`}
+          className={`field-input ${icon ? "pl-9" : ""} ${error ? "border-red-400 focus:ring-red-400" : ""}`}
         />
       </div>
       {error && (
@@ -314,7 +307,7 @@ function TextArea({
   );
 }
 
-function RadioGroup({ label, name, options, value, onChange }) {
+function RadioGroup({ label, name, options, value, onChange, locked }) {
   return (
     <div>
       {label && <Label>{label}</Label>}
@@ -323,15 +316,18 @@ function RadioGroup({ label, name, options, value, onChange }) {
           const val = o.value || o;
           const lbl = o.label || o;
           const selected = value === val;
+          const isLocked = locked && !selected;
           return (
             <button
               key={val}
               type="button"
-              onClick={() => onChange(name, val)}
+              onClick={() => !isLocked && onChange(name, val)}
               className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-all duration-150 active:scale-95 ${
                 selected
                   ? "bg-coffee-600 text-white border-coffee-600"
-                  : "bg-white text-coffee-600 border-coffee-200 hover:border-coffee-400"
+                  : isLocked
+                    ? "bg-gray-50 text-gray-300 border-gray-200 cursor-not-allowed"
+                    : "bg-white text-coffee-600 border-coffee-200 hover:border-coffee-400"
               }`}
             >
               {lbl}
@@ -343,33 +339,41 @@ function RadioGroup({ label, name, options, value, onChange }) {
   );
 }
 
-function CheckboxField({ name, label, checked, onChange, sublabel }) {
+function CheckboxField({ name, label, checked, onChange, sublabel, hint }) {
   return (
-    <label className="flex items-start gap-3 cursor-pointer group">
-      <div className="mt-0.5 shrink-0">
-        <input
-          type="checkbox"
-          checked={!!checked}
-          onChange={(e) => onChange(name, e.target.checked)}
-          className="sr-only"
-        />
-        <div
-          className={`w-4 h-4 rounded border-2 flex items-center justify-center transition-all ${
-            checked
-              ? "bg-coffee-600 border-coffee-600"
-              : "border-coffee-300 group-hover:border-coffee-500"
-          }`}
-        >
-          {checked && <FiCheck size={10} className="text-white" />}
+    <div>
+      <label className="flex items-start gap-3 cursor-pointer group">
+        <div className="mt-0.5 shrink-0">
+          <input
+            type="checkbox"
+            checked={!!checked}
+            onChange={(e) => onChange(name, e.target.checked)}
+            className="sr-only"
+          />
+          <div
+            className={`w-4 h-4 rounded border-2 flex items-center justify-center transition-all ${
+              checked
+                ? "bg-coffee-600 border-coffee-600"
+                : "border-coffee-300 group-hover:border-coffee-500"
+            }`}
+          >
+            {checked && <FiCheck size={10} className="text-white" />}
+          </div>
         </div>
-      </div>
-      <div>
-        <p className="text-sm text-charcoal leading-snug">{label}</p>
-        {sublabel && (
-          <p className="text-xs text-coffee-400 mt-0.5">{sublabel}</p>
-        )}
-      </div>
-    </label>
+        <div>
+          <p className="text-sm text-charcoal leading-snug">{label}</p>
+          {sublabel && (
+            <p className="text-xs text-coffee-400 mt-0.5">{sublabel}</p>
+          )}
+        </div>
+      </label>
+      {hint && checked && (
+        <p className="text-xs text-coffee-500 mt-1.5 ml-7 flex items-center gap-1">
+          <FiCheck size={10} className="text-green-500" />
+          {hint}
+        </p>
+      )}
+    </div>
   );
 }
 
@@ -425,11 +429,8 @@ function SectionTitle({ icon, title, subtitle }) {
   );
 }
 
-// ── City Select (dropdown only, no auto-detect) ───────────────────────────────
-
 function CitySelect({ value, onChange, error }) {
   const [cities, setCities] = useState([]);
-
   useEffect(() => {
     fetch("/api/cities")
       .then((r) => r.json())
@@ -438,7 +439,6 @@ function CitySelect({ value, onChange, error }) {
       })
       .catch(() => {});
   }, []);
-
   return (
     <div>
       <Label>City *</Label>
@@ -446,9 +446,7 @@ function CitySelect({ value, onChange, error }) {
         <select
           value={value || ""}
           onChange={(e) => onChange("city", e.target.value)}
-          className={`field-select pr-9 ${
-            error ? "border-red-400 focus:ring-red-400" : ""
-          }`}
+          className={`field-select pr-9 ${error ? "border-red-400 focus:ring-red-400" : ""}`}
         >
           <option value="">Select your city</option>
           {cities.map((c) => (
@@ -547,8 +545,25 @@ export default function SignupForm() {
     return () => clearTimeout(debounceRef.current);
   }, [form, ready, syncDraft]);
 
+  // ── Smart update — preference wins, lifestyle locks ───────────────────────
   const update = (key, value) => {
-    setForm((p) => ({ ...p, [key]: value }));
+    setForm((p) => {
+      const next = { ...p, [key]: value };
+
+      // Preference ON → override lifestyle
+      if (key === "preferNonDrinking" && value === true) next.drinking = "no";
+      if (key === "preferNonSmoking" && value === true)
+        next.smoking = "non-smoker";
+      if (key === "preferVegGroup" && value === true) next.food = "veg";
+
+      // Lifestyle changed to conflict → auto-uncheck preference
+      if (key === "drinking" && value !== "no") next.preferNonDrinking = false;
+      if (key === "smoking" && value !== "non-smoker")
+        next.preferNonSmoking = false;
+      if (key === "food" && value !== "veg") next.preferVegGroup = false;
+
+      return next;
+    });
     setErrors((p) => ({ ...p, [key]: undefined }));
   };
 
@@ -568,10 +583,9 @@ export default function SignupForm() {
     setErrors(errs);
     if (Object.keys(errs).length > 0) {
       setTimeout(() => {
-        document.querySelector("[data-error]")?.scrollIntoView({
-          behavior: "smooth",
-          block: "center",
-        });
+        document
+          .querySelector("[data-error]")
+          ?.scrollIntoView({ behavior: "smooth", block: "center" });
       }, 50);
     }
     return Object.keys(errs).length === 0;
@@ -634,7 +648,6 @@ export default function SignupForm() {
   const isCouples = form.groupPreference === "couples";
   const isSponsored = form.participationType === "sponsored";
   const isCoSponsor = form.participationType === "co-sponsor";
-  const wantsTrip = form.tripIntent === "yes";
 
   const baseFee = form.gender === "Female" ? 2999 : 3999;
   const partnerFee =
@@ -927,6 +940,7 @@ export default function SignupForm() {
             subtitle="Be honest — it helps with better matching."
           />
 
+          {/* Drinking */}
           <div className="space-y-2">
             <RadioGroup
               label="Drinking"
@@ -938,15 +952,18 @@ export default function SignupForm() {
                 { value: "social", label: "Social" },
                 { value: "occasional", label: "Occasional" },
               ]}
+              locked={form.preferNonDrinking}
             />
             <CheckboxField
               name="preferNonDrinking"
-              label="Prefer non-drinking group"
+              label="I only want a non-drinking group"
               checked={form.preferNonDrinking}
               onChange={update}
+              hint="Drinking preference auto-set to No"
             />
           </div>
 
+          {/* Smoking */}
           <div className="space-y-2">
             <RadioGroup
               label="Smoking"
@@ -957,15 +974,18 @@ export default function SignupForm() {
                 { value: "non-smoker", label: "Non-smoker" },
                 { value: "smoker", label: "Smoker" },
               ]}
+              locked={form.preferNonSmoking}
             />
             <CheckboxField
               name="preferNonSmoking"
-              label="Prefer non-smoking group"
+              label="I only want a non-smoking group"
               checked={form.preferNonSmoking}
               onChange={update}
+              hint="Smoking preference auto-set to Non-smoker"
             />
           </div>
 
+          {/* Food */}
           <div className="space-y-2">
             <RadioGroup
               label="Food Preference"
@@ -977,12 +997,14 @@ export default function SignupForm() {
                 { value: "non-veg", label: "Non-veg" },
                 { value: "no-pref", label: "No preference" },
               ]}
+              locked={form.preferVegGroup}
             />
             <CheckboxField
               name="preferVegGroup"
-              label="Prefer veg-only group"
+              label="I only want a veg group"
               checked={form.preferVegGroup}
               onChange={update}
+              hint="Food preference auto-set to Veg"
             />
           </div>
         </div>
@@ -994,7 +1016,6 @@ export default function SignupForm() {
             title="Personality & Vibe"
             subtitle="What kind of person are you?"
           />
-
           <RadioGroup
             label="Personality"
             name="personality"
@@ -1006,7 +1027,6 @@ export default function SignupForm() {
               { value: "extrovert", label: "Extrovert" },
             ]}
           />
-
           <RadioGroup
             label="Conversation Style"
             name="conversation"
@@ -1026,7 +1046,6 @@ export default function SignupForm() {
             icon={<FiUsers size={15} />}
             title="Group Preference (Travel)"
           />
-
           <RadioGroup
             name="groupPreference"
             value={form.groupPreference}
@@ -1116,57 +1135,55 @@ export default function SignupForm() {
             ]}
           />
 
-          {wantsTrip && (
-            <div className="space-y-4 pt-2 border-t border-coffee-100">
+          <div className="space-y-4 pt-2 border-t border-coffee-100">
+            <RadioGroup
+              label="Trip Type"
+              name="tripType"
+              value={form.tripType}
+              onChange={update}
+              options={[
+                { value: "local", label: "Local (1–2 days)" },
+                { value: "domestic", label: "Domestic (3–8 days)" },
+                { value: "international", label: "International" },
+              ]}
+            />
+
+            <div>
               <RadioGroup
-                label="Trip Type"
-                name="tripType"
-                value={form.tripType}
+                label="My Trip Budget (per head)"
+                name="budget"
+                value={form.budget}
                 onChange={update}
                 options={[
-                  { value: "local", label: "Local (1–2 days)" },
-                  { value: "domestic", label: "Domestic (3–8 days)" },
-                  { value: "international", label: "International" },
+                  { value: "5k-10k", label: "₹5k–₹10k" },
+                  { value: "10k-30k", label: "₹10k–₹30k" },
+                  { value: "30k-1L", label: "₹30k–₹1L" },
+                  { value: "1L-2L", label: "₹1L–₹2L" },
+                  { value: "2L+", label: "₹2L+" },
                 ]}
               />
-
-              <div>
-                <RadioGroup
-                  label="My Trip Budget (per head)"
-                  name="budget"
-                  value={form.budget}
-                  onChange={update}
-                  options={[
-                    { value: "5k-10k", label: "₹5k–₹10k" },
-                    { value: "10k-30k", label: "₹10k–₹30k" },
-                    { value: "30k-1L", label: "₹30k–₹1L" },
-                    { value: "1L-2L", label: "₹1L–₹2L" },
-                    { value: "2L+", label: "₹2L+" },
-                  ]}
-                />
-                {(isCoSponsor || (isCouples && form.payingForBoth)) && (
-                  <p className="text-xs text-coffee-400 mt-1.5">
-                    If sponsoring, the sponsored person's trip budget will match
-                    as yours — or even for couple per head.
-                  </p>
-                )}
-              </div>
-
-              <RadioGroup
-                label="Travel Timing for the Trip"
-                name="travelTiming"
-                value={form.travelTiming}
-                onChange={update}
-                options={[
-                  { value: "immediate", label: "Immediate" },
-                  { value: "this-weekend", label: "This weekend" },
-                  { value: "next-weekend", label: "Next weekend" },
-                  { value: "1-month", label: "Within 1 month" },
-                  { value: "exploring", label: "Just exploring" },
-                ]}
-              />
+              {(isCoSponsor || (isCouples && form.payingForBoth)) && (
+                <p className="text-xs text-coffee-400 mt-1.5">
+                  If sponsoring, the sponsored person's trip budget will match
+                  as yours — or even for couple per head.
+                </p>
+              )}
             </div>
-          )}
+
+            <RadioGroup
+              label="Travel Timing for the Trip"
+              name="travelTiming"
+              value={form.travelTiming}
+              onChange={update}
+              options={[
+                { value: "immediate", label: "Immediate" },
+                { value: "this-weekend", label: "This weekend" },
+                { value: "next-weekend", label: "Next weekend" },
+                { value: "1-month", label: "Within 1 month" },
+                { value: "exploring", label: "Just exploring" },
+              ]}
+            />
+          </div>
         </div>
 
         {/* ── 10. Pricing ── */}
@@ -1217,7 +1234,6 @@ export default function SignupForm() {
                 </p>
               )}
             </div>
-
             <div data-error={errors.consentExperience ? true : undefined}>
               <CheckboxField
                 name="consentExperience"
@@ -1231,7 +1247,6 @@ export default function SignupForm() {
                 </p>
               )}
             </div>
-
             <div data-error={errors.consentNoTrip ? true : undefined}>
               <CheckboxField
                 name="consentNoTrip"
@@ -1245,7 +1260,6 @@ export default function SignupForm() {
                 </p>
               )}
             </div>
-
             <div data-error={errors.consentNoRefund ? true : undefined}>
               <CheckboxField
                 name="consentNoRefund"
@@ -1276,6 +1290,36 @@ export default function SignupForm() {
             ]}
           />
         </div>
+
+        {/* ── Total Amount Summary ── */}
+        {form.gender && (
+          <div className="bg-coffee-600 rounded-2xl p-5 text-white">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wider text-coffee-200 mb-1">
+                  {isCouples && form.payingForBoth && partnerFee
+                    ? "Total Amount (both)"
+                    : "Your Booking Amount"}
+                </p>
+                <p className="text-3xl font-bold">
+                  ₹{totalFee.toLocaleString("en-IN")}
+                </p>
+                {isCouples && form.payingForBoth && partnerFee ? (
+                  <p className="text-xs text-coffee-300 mt-1">
+                    You ({form.gender}) ₹{baseFee.toLocaleString("en-IN")} +
+                    Partner ({form.couplePartnerGender}) ₹
+                    {partnerFee.toLocaleString("en-IN")}
+                  </p>
+                ) : (
+                  <p className="text-xs text-coffee-300 mt-1">
+                    Includes ₹1,000 redeemable at the café
+                  </p>
+                )}
+              </div>
+              <div className="text-4xl">☕</div>
+            </div>
+          </div>
+        )}
 
         {/* ── Submit ── */}
         <div className="pt-2 space-y-3 pb-6">

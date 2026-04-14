@@ -18,7 +18,6 @@ import {
   FiAlertCircle,
   FiRefreshCw,
   FiCalendar,
-  FiDollarSign,
 } from "react-icons/fi";
 import {
   MdOutlineDirectionsBus,
@@ -278,7 +277,9 @@ function TextInput({
           value={value || ""}
           placeholder={placeholder || label}
           onChange={(e) => onChange(name, e.target.value)}
-          className={`field-input ${icon ? "pl-9" : ""} ${error ? "border-red-400 focus:ring-red-400" : ""}`}
+          className={`field-input ${icon ? "pl-9" : ""} ${
+            error ? "border-red-400 focus:ring-red-400" : ""
+          }`}
         />
       </div>
       {error && (
@@ -424,6 +425,49 @@ function SectionTitle({ icon, title, subtitle }) {
   );
 }
 
+// ── City Select (dropdown only, no auto-detect) ───────────────────────────────
+
+function CitySelect({ value, onChange, error }) {
+  const [cities, setCities] = useState([]);
+
+  useEffect(() => {
+    fetch("/api/cities")
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.success) setCities(d.data);
+      })
+      .catch(() => {});
+  }, []);
+
+  return (
+    <div>
+      <Label>City *</Label>
+      <div className="relative">
+        <select
+          value={value || ""}
+          onChange={(e) => onChange("city", e.target.value)}
+          className={`field-select pr-9 ${
+            error ? "border-red-400 focus:ring-red-400" : ""
+          }`}
+        >
+          <option value="">Select your city</option>
+          {cities.map((c) => (
+            <option key={c._id} value={c.name}>
+              {c.name}
+            </option>
+          ))}
+        </select>
+        <FiChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-coffee-400 pointer-events-none text-sm" />
+      </div>
+      {error && (
+        <p className="flex items-center gap-1 text-red-500 text-xs mt-1">
+          <FiAlertCircle size={10} /> {error}
+        </p>
+      )}
+    </div>
+  );
+}
+
 // ── Main Form ─────────────────────────────────────────────────────────────────
 
 export default function SignupForm() {
@@ -439,7 +483,6 @@ export default function SignupForm() {
   const pendingRef = useRef(false);
   const isFirst = useRef(true);
 
-  // ── Restore on mount ───────────────────────────────────────────────────────
   useEffect(() => {
     const local = localStorage.getItem(DRAFT_KEY);
     if (local) {
@@ -452,7 +495,6 @@ export default function SignupForm() {
     setReady(true);
   }, []);
 
-  // ── Flush pending sync when back online ───────────────────────────────────
   useEffect(() => {
     if (online && pendingRef.current) {
       pendingRef.current = false;
@@ -465,7 +507,6 @@ export default function SignupForm() {
     }
   }, [online]);
 
-  // ── Sync to DB ─────────────────────────────────────────────────────────────
   const syncDraft = useCallback(
     async (data) => {
       if (!online) {
@@ -493,7 +534,6 @@ export default function SignupForm() {
     [online],
   );
 
-  // ── Watch form ─────────────────────────────────────────────────────────────
   useEffect(() => {
     if (!ready) return;
     if (isFirst.current) {
@@ -512,7 +552,6 @@ export default function SignupForm() {
     setErrors((p) => ({ ...p, [key]: undefined }));
   };
 
-  // ── Validate ───────────────────────────────────────────────────────────────
   const validate = () => {
     const errs = {};
     if (!form.firstName?.trim()) errs.firstName = "First name is required";
@@ -522,9 +561,10 @@ export default function SignupForm() {
     if (!form.gender) errs.gender = "Please select gender";
     if (!form.age || Number(form.age) < 21) errs.age = "Must be 21 or older";
     if (!form.ageConfirmed) errs.ageConfirmed = "Please confirm your age";
-    if (!form.consentAgreed) errs.consentAgreed = "Please agree to terms";
-    if (!form.consentFormat)
-      errs.consentFormat = "Please confirm experience format";
+    if (!form.consentRedeemable) errs.consentRedeemable = "Please confirm";
+    if (!form.consentExperience) errs.consentExperience = "Please confirm";
+    if (!form.consentNoTrip) errs.consentNoTrip = "Please confirm";
+    if (!form.consentNoRefund) errs.consentNoRefund = "Please confirm";
     setErrors(errs);
     if (Object.keys(errs).length > 0) {
       setTimeout(() => {
@@ -537,7 +577,6 @@ export default function SignupForm() {
     return Object.keys(errs).length === 0;
   };
 
-  // ── Submit ─────────────────────────────────────────────────────────────────
   const doSubmit = async () => {
     if (!validate()) return;
     if (!online) {
@@ -548,7 +587,9 @@ export default function SignupForm() {
     setSubmit("submitting");
     setRetry(0);
 
+    const draftId = getDraftId();
     let attempt = 0;
+
     while (attempt < MAX_RETRIES) {
       try {
         setRetry(attempt);
@@ -557,17 +598,13 @@ export default function SignupForm() {
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(form),
+            body: JSON.stringify({ ...form, draftId }),
           },
           1,
         );
         if (data.success) {
-          const draftId = getDraftId();
           localStorage.removeItem(DRAFT_KEY);
           localStorage.removeItem(DRAFT_ID_KEY);
-          try {
-            await fetch(`/api/draft?draftId=${draftId}`, { method: "DELETE" });
-          } catch {}
           setSubmit("success");
           return;
         }
@@ -598,7 +635,18 @@ export default function SignupForm() {
   const isSponsored = form.participationType === "sponsored";
   const isCoSponsor = form.participationType === "co-sponsor";
   const wantsTrip = form.tripIntent === "yes";
-  const pricingFee = form.gender === "Female" ? "₹2,999" : "₹3,999";
+
+  const baseFee = form.gender === "Female" ? 2999 : 3999;
+  const partnerFee =
+    form.couplePartnerGender === "Female"
+      ? 2999
+      : form.couplePartnerGender === "Male"
+        ? 3999
+        : null;
+  const totalFee =
+    isCouples && form.payingForBoth && partnerFee
+      ? baseFee + partnerFee
+      : baseFee;
 
   return (
     <>
@@ -631,11 +679,10 @@ export default function SignupForm() {
         <div className="text-center pb-2">
           <p className="text-4xl mb-3">☕</p>
           <h1 className="text-2xl font-bold text-charcoal">
-            Join CoffeeToTrip
+            Meet Strangers Over Coffee
           </h1>
           <p className="text-sm text-coffee-500 mt-1 max-w-xs mx-auto leading-relaxed">
-            Fill in your profile. We'll manually match you with your ideal
-            travel crew.
+            Travel if it clicks 🧳✈️ · Small curated groups · Real. No pressure.
           </p>
         </div>
 
@@ -728,13 +775,9 @@ export default function SignupForm() {
           </div>
 
           <div data-error={errors.city ? true : undefined}>
-            <TextInput
-              label="City *"
-              icon={<FiMapPin size={14} />}
-              name="city"
+            <CitySelect
               value={form.city}
               onChange={update}
-              placeholder="Where are you based?"
               error={errors.city}
             />
           </div>
@@ -783,6 +826,15 @@ export default function SignupForm() {
             onChange={update}
             type="date"
           />
+          {form.preferredDate && (
+            <p className="text-xs text-coffee-500 -mt-2">
+              {new Date(form.preferredDate).toLocaleDateString("en-IN", {
+                day: "numeric",
+                month: "long",
+                year: "numeric",
+              })}
+            </p>
+          )}
         </div>
 
         {/* ── 4. Participation Type ── */}
@@ -842,13 +894,19 @@ export default function SignupForm() {
           )}
 
           {isCoSponsor && (
-            <RadioGroup
-              label="Sponsor preference"
-              name="sponsorPreference"
-              value={form.sponsorPreference}
-              onChange={update}
-              options={["Male", "Female", "No preference"]}
-            />
+            <div className="space-y-3">
+              <p className="text-xs text-coffee-500">
+                If sponsoring, who would you like to sponsor for this trip? (1
+                person, same trip budget as yours)
+              </p>
+              <RadioGroup
+                label="Sponsor preference"
+                name="sponsorPreference"
+                value={form.sponsorPreference}
+                onChange={update}
+                options={["Male", "Female", "No preference"]}
+              />
+            </div>
           )}
 
           {(isSponsored || isCoSponsor) && (
@@ -983,12 +1041,6 @@ export default function SignupForm() {
 
           {isCouples && (
             <div className="space-y-3 pt-1 border-t border-coffee-100">
-              <CheckboxField
-                name="joiningAsCouple"
-                label="Joining as a couple"
-                checked={form.joiningAsCouple}
-                onChange={update}
-              />
               <TextInput
                 label="Partner's Name"
                 icon={<FiHeart size={14} />}
@@ -999,16 +1051,32 @@ export default function SignupForm() {
               />
               <CheckboxField
                 name="bothWillAttend"
-                label="We both will attend"
+                label="We will both attend the coffee experience to explore compatibility for the trip & both are 21+ age"
                 checked={form.bothWillAttend}
                 onChange={update}
               />
               <CheckboxField
                 name="payingForBoth"
-                label="I will pay for both"
+                label="I will cover payment for both"
                 checked={form.payingForBoth}
                 onChange={update}
               />
+              {form.payingForBoth && (
+                <div>
+                  <p className="text-xs text-coffee-500 mb-2">
+                    Partner's gender (for pricing)
+                  </p>
+                  <RadioGroup
+                    name="couplePartnerGender"
+                    value={form.couplePartnerGender}
+                    onChange={update}
+                    options={[
+                      { value: "Male", label: "Male (₹3,999)" },
+                      { value: "Female", label: "Female (₹2,999)" },
+                    ]}
+                  />
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -1062,22 +1130,30 @@ export default function SignupForm() {
                 ]}
               />
 
-              <RadioGroup
-                label="Budget Range (Per Head)"
-                name="budget"
-                value={form.budget}
-                onChange={update}
-                options={[
-                  { value: "5k-10k", label: "₹5k–₹10k" },
-                  { value: "10k-30k", label: "₹10k–₹30k" },
-                  { value: "30k-1L", label: "₹30k–₹1L" },
-                  { value: "1L-2L", label: "₹1L–₹2L" },
-                  { value: "2L+", label: "₹2L+" },
-                ]}
-              />
+              <div>
+                <RadioGroup
+                  label="My Trip Budget (per head)"
+                  name="budget"
+                  value={form.budget}
+                  onChange={update}
+                  options={[
+                    { value: "5k-10k", label: "₹5k–₹10k" },
+                    { value: "10k-30k", label: "₹10k–₹30k" },
+                    { value: "30k-1L", label: "₹30k–₹1L" },
+                    { value: "1L-2L", label: "₹1L–₹2L" },
+                    { value: "2L+", label: "₹2L+" },
+                  ]}
+                />
+                {(isCoSponsor || (isCouples && form.payingForBoth)) && (
+                  <p className="text-xs text-coffee-400 mt-1.5">
+                    If sponsoring, the sponsored person's trip budget will match
+                    as yours — or even for couple per head.
+                  </p>
+                )}
+              </div>
 
               <RadioGroup
-                label="Travel Timing"
+                label="Travel Timing for the Trip"
                 name="travelTiming"
                 value={form.travelTiming}
                 onChange={update}
@@ -1098,7 +1174,7 @@ export default function SignupForm() {
           <p className="text-xs font-bold text-coffee-700 uppercase tracking-wider mb-3">
             Pricing
           </p>
-          <div className="flex items-center justify-between mb-3">
+          <div className="flex items-start justify-between mb-4">
             <div className="space-y-1">
               <p className="text-sm text-charcoal">
                 <span className="font-semibold">Men:</span> ₹3,999
@@ -1109,20 +1185,80 @@ export default function SignupForm() {
             </div>
             {form.gender && (
               <div className="text-right">
-                <p className="text-xs text-coffee-500">Your fee</p>
-                <p className="text-2xl font-bold text-coffee-700">
-                  {pricingFee}
+                <p className="text-xs text-coffee-500">
+                  {isCouples && form.payingForBoth && partnerFee
+                    ? "Total (both)"
+                    : "Your fee"}
                 </p>
+                <p className="text-2xl font-bold text-coffee-700">
+                  ₹{totalFee.toLocaleString("en-IN")}
+                </p>
+                {isCouples && form.payingForBoth && partnerFee && (
+                  <p className="text-xs text-coffee-400">
+                    ₹{baseFee.toLocaleString("en-IN")} + ₹
+                    {partnerFee.toLocaleString("en-IN")}
+                  </p>
+                )}
               </div>
             )}
           </div>
-          <div className="bg-white border border-coffee-100 rounded-xl px-3 py-2.5">
-            <CheckboxField
-              name="redeemableUnderstood"
-              label="I understand ₹1,000 is redeemable at the café (food & beverages)"
-              checked={form.redeemableUnderstood}
-              onChange={update}
-            />
+
+          <div className="space-y-3">
+            <div data-error={errors.consentRedeemable ? true : undefined}>
+              <CheckboxField
+                name="consentRedeemable"
+                label="I understand ₹1,000 is redeemable at the café (food & beverages)"
+                checked={form.consentRedeemable}
+                onChange={update}
+              />
+              {errors.consentRedeemable && (
+                <p className="text-red-500 text-xs mt-1 flex items-center gap-1">
+                  <FiAlertCircle size={10} /> {errors.consentRedeemable}
+                </p>
+              )}
+            </div>
+
+            <div data-error={errors.consentExperience ? true : undefined}>
+              <CheckboxField
+                name="consentExperience"
+                label="I understand this payment is for a curated coffee experience to meet new people before planning a trip"
+                checked={form.consentExperience}
+                onChange={update}
+              />
+              {errors.consentExperience && (
+                <p className="text-red-500 text-xs mt-1 flex items-center gap-1">
+                  <FiAlertCircle size={10} /> {errors.consentExperience}
+                </p>
+              )}
+            </div>
+
+            <div data-error={errors.consentNoTrip ? true : undefined}>
+              <CheckboxField
+                name="consentNoTrip"
+                label="I understand no trip is included in this booking. Any trip may happen later based on group compatibility"
+                checked={form.consentNoTrip}
+                onChange={update}
+              />
+              {errors.consentNoTrip && (
+                <p className="text-red-500 text-xs mt-1 flex items-center gap-1">
+                  <FiAlertCircle size={10} /> {errors.consentNoTrip}
+                </p>
+              )}
+            </div>
+
+            <div data-error={errors.consentNoRefund ? true : undefined}>
+              <CheckboxField
+                name="consentNoRefund"
+                label="I understand this booking is non-refundable"
+                checked={form.consentNoRefund}
+                onChange={update}
+              />
+              {errors.consentNoRefund && (
+                <p className="text-red-500 text-xs mt-1 flex items-center gap-1">
+                  <FiAlertCircle size={10} /> {errors.consentNoRefund}
+                </p>
+              )}
+            </div>
           </div>
         </div>
 
@@ -1139,41 +1275,6 @@ export default function SignupForm() {
               { value: "both", label: "Open to both" },
             ]}
           />
-        </div>
-
-        {/* ── 12. Final Consent ── */}
-        <div className="section-card space-y-4">
-          <SectionTitle icon={<FiCheck size={15} />} title="Final Consent" />
-
-          <div className="space-y-4">
-            <div data-error={errors.consentAgreed ? true : undefined}>
-              <CheckboxField
-                name="consentAgreed"
-                label="I agree to the pricing & policies"
-                checked={form.consentAgreed}
-                onChange={update}
-              />
-              {errors.consentAgreed && (
-                <p className="text-red-500 text-xs mt-1 flex items-center gap-1">
-                  <FiAlertCircle size={10} /> {errors.consentAgreed}
-                </p>
-              )}
-            </div>
-
-            <div data-error={errors.consentFormat ? true : undefined}>
-              <CheckboxField
-                name="consentFormat"
-                label="I understand the experience format"
-                checked={form.consentFormat}
-                onChange={update}
-              />
-              {errors.consentFormat && (
-                <p className="text-red-500 text-xs mt-1 flex items-center gap-1">
-                  <FiAlertCircle size={10} /> {errors.consentFormat}
-                </p>
-              )}
-            </div>
-          </div>
         </div>
 
         {/* ── Submit ── */}

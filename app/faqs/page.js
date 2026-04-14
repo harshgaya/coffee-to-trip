@@ -1,87 +1,111 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import { FiChevronDown, FiChevronUp } from "react-icons/fi";
 
 const FAQS = [
   {
-    category: "Getting Started",
+    category: "About CoffeeToTrip",
     items: [
       {
         q: "What is CoffeeToTrip?",
-        a: "CoffeeToTrip is a curated matchmaking platform for travellers. We match you with compatible people based on your lifestyle, budget, vibe, and travel preferences — and start with a casual coffee meetup before any trip is planned.",
+        a: "CoffeeToTrip is a curated experience where you meet new people over coffee in small groups. If the group connects well, you can plan a trip together.",
       },
       {
-        q: "Is this a travel agency?",
-        a: "No. We don't sell tour packages or book trips on your behalf. We connect compatible people — what you do after the match is entirely up to your group.",
+        q: "Is this a dating platform?",
+        a: "No. This is a curated social experience focused on meeting new people and exploring travel opportunities.",
       },
       {
-        q: "How do I sign up?",
-        a: "Click 'Join Now' on the homepage and fill out our 4-step profile form. It takes about 2 minutes. Once submitted, our team will review your profile and reach out on WhatsApp.",
+        q: "How does CoffeeToTrip work?",
+        a: "You book a slot → we match you with a group of people → you meet at a café → if it clicks, you may plan a trip together.",
       },
       {
-        q: "Is there a fee to join?",
-        a: "Signing up is free. Costs for the actual trips are managed between group members directly.",
-      },
-    ],
-  },
-  {
-    category: "Matching",
-    items: [
-      {
-        q: "How does matching work?",
-        a: "Our team manually reviews all profiles and groups people based on city, gender preference, lifestyle (drinking, smoking, food), trip budget, and personality type. There's no automated algorithm — real human judgement goes into every match.",
-      },
-      {
-        q: "How long does it take to get matched?",
-        a: "Usually within 5–10 business days. We batch matches when we have a strong group forming in your city. You'll hear from us on WhatsApp.",
-      },
-      {
-        q: "Can I request a specific type of group?",
-        a: "Yes — the signup form lets you choose your preference: all-men, all-women, mixed, or couples groups. We do our best to honour this.",
-      },
-      {
-        q: "What if I don't click with my matched group?",
-        a: "The coffee meetup is specifically for this. If it doesn't feel right, let us know and we'll try to find a better fit in the next batch.",
+        q: "Who is this experience for?",
+        a: "Anyone who wants to meet new people, expand their social circle, and explore travel opportunities in a safe, curated way.",
       },
     ],
   },
   {
-    category: "Safety",
+    category: "The Experience",
     items: [
       {
-        q: "Is it safe to meet strangers from this platform?",
-        a: "Safety is our top priority. All meetups start in public places (cafés, restaurants). Profiles are reviewed manually before grouping. For women-only trips, we add extra vetting steps.",
+        q: "Is the trip included in the booking?",
+        a: "No. This booking is only for the coffee meetup. Any trip happens later based on group compatibility.",
       },
       {
-        q: "Do you verify identities?",
-        a: "We collect phone numbers and conduct basic manual verification. We may request additional verification for co-sponsor or sponsored participation types.",
+        q: "How many people are in a group?",
+        a: "Each group is limited to a maximum of 20 people to ensure comfort and meaningful interactions.",
       },
       {
-        q: "What if someone behaves inappropriately?",
-        a: "Report immediately via WhatsApp to our team. We take this seriously — offending members are permanently removed and blocked from the platform.",
+        q: "Can I choose who I meet?",
+        a: "No direct selection. We curate groups to ensure balanced and meaningful interactions.",
+      },
+      {
+        q: "What happens after booking?",
+        a: "You'll receive confirmation and details. Final café location is shared before the meetup.",
+      },
+      {
+        q: "When will I get group details?",
+        a: "Details are shared closer to the meetup time (usually within 6–12 hours).",
+      },
+      {
+        q: "Can I bring a friend?",
+        a: 'Only if you select the "couple" option and register together.',
+      },
+      {
+        q: "Do I have to go on a trip after the meetup?",
+        a: "No. Travel is completely optional and depends on group comfort.",
+      },
+      {
+        q: "What if I don't connect with the group?",
+        a: "That's okay. The experience ends with the coffee meetup.",
       },
     ],
   },
   {
-    category: "Trips",
+    category: "Safety & Matching",
     items: [
       {
-        q: "Who plans the actual trip?",
-        a: "The group decides together. Once matched and post-coffee meetup, it's up to the group to pick a destination, dates, and budget. We may share resources and suggestions.",
+        q: "Is it safe to meet strangers?",
+        a: "Yes. All meetups happen in public cafés, and groups are manually curated for compatibility.",
       },
       {
-        q: "What types of trips happen on CoffeeToTrip?",
-        a: "Everything from local day trips and weekend getaways to domestic and international travel. It depends on what your group agrees on.",
+        q: "How are groups selected?",
+        a: "We match people based on preferences like lifestyle, personality, and travel intent.",
+      },
+    ],
+  },
+  {
+    category: "Pricing & Booking",
+    items: [
+      {
+        q: "What is included in the price?",
+        a: "₹1,000 is redeemable at the café for food & beverages. The rest covers curation, hosting, and experience design.",
       },
       {
-        q: "What does 'co-sponsor' mean?",
-        a: "It means two people split the cost of a trip slot — typically one person funds the other in exchange for companionship on the trip. Both parties must agree upfront.",
+        q: "Why are prices different for men and women?",
+        a: "Pricing is structured to maintain balanced group dynamics and participation.",
       },
       {
-        q: "What does 'sponsored' mean?",
-        a: "You're open to having someone else fund your trip in full. We'll show your profile to potential sponsors who've opted into this. You write a note explaining why you'd be a great travel companion.",
+        q: "Is the booking refundable?",
+        a: "No. All bookings are non-refundable.",
+      },
+      {
+        q: "Can I reschedule my booking?",
+        a: "Rescheduling may be considered based on availability, but is not guaranteed.",
+      },
+    ],
+  },
+  {
+    category: "Sponsorship",
+    items: [
+      {
+        q: "What is sponsorship?",
+        a: "You can choose to sponsor someone or opt to be sponsored. This is optional and managed by the platform.",
+      },
+      {
+        q: "Are there any expectations in sponsorship?",
+        a: "No. Sponsorship has no expectations or obligations.",
       },
     ],
   },

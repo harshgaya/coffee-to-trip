@@ -859,7 +859,7 @@ export default function SignupForm() {
           <div className="space-y-3">
             <CheckboxField
               name="participationType"
-              label="I will pay for myself"
+              label="⁠I will cover my own trip expenses"
               checked={form.participationType === "self"}
               onChange={() =>
                 update(
@@ -870,7 +870,7 @@ export default function SignupForm() {
             />
             <CheckboxField
               name="participationType"
-              label="I can co-sponsor someone"
+              label="  ⁠I’d like to support one participant’s experience"
               checked={form.participationType === "co-sponsor"}
               onChange={() =>
                 update(
@@ -881,7 +881,7 @@ export default function SignupForm() {
             />
             <CheckboxField
               name="participationType"
-              label="I am open to being sponsored"
+              label=" ⁠I’d like to be supported"
               checked={form.participationType === "sponsored"}
               onChange={() =>
                 update(

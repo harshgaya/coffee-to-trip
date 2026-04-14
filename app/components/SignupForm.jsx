@@ -87,28 +87,28 @@ function StickySaveBar({ status, online, onRetry, onClear, hasData }) {
     );
   } else if (status === "saving") {
     content = (
-      <div className="flex items-center gap-2 text-xs text-coffee-500">
+      <div className="flex items-center gap-2 text-xs text-coffee-600">
         <FiLoader size={11} className="animate-spin shrink-0" />
         <span>Saving...</span>
       </div>
     );
   } else if (status === "saved") {
     content = (
-      <div className="flex items-center gap-2 text-xs text-green-600">
+      <div className="flex items-center gap-2 text-xs text-green-700">
         <FiCheck size={11} className="shrink-0" />
         <span>All changes saved</span>
       </div>
     );
   } else if (status === "restored") {
     content = (
-      <div className="flex items-center gap-2 text-xs text-coffee-600">
+      <div className="flex items-center gap-2 text-xs text-coffee-700">
         <FiClock size={11} className="shrink-0" />
         <span>Draft restored</span>
       </div>
     );
   } else if (status === "error") {
     content = (
-      <div className="flex items-center gap-2 text-xs text-red-600">
+      <div className="flex items-center gap-2 text-xs text-red-700">
         <FiAlertCircle size={11} className="shrink-0" />
         <span>Sync failed.</span>
         <button
@@ -129,12 +129,12 @@ function StickySaveBar({ status, online, onRetry, onClear, hasData }) {
       }`}
     >
       <div className="max-w-xl mx-auto px-4 mt-2">
-        <div className="bg-white/90 backdrop-blur-sm border border-coffee-100 rounded-xl px-3 py-2 shadow-sm flex items-center justify-between">
+        <div className="bg-white/90 backdrop-blur-sm border border-coffee-200 rounded-xl px-3 py-2 shadow-sm flex items-center justify-between">
           <div>{content}</div>
           {hasData && (
             <button
               onClick={onClear}
-              className="text-xs text-coffee-300 hover:text-red-400 transition-colors ml-3 shrink-0"
+              className="text-xs text-coffee-500 hover:text-red-500 transition-colors ml-3 shrink-0"
             >
               Clear draft
             </button>
@@ -155,11 +155,11 @@ function SubmitOverlay({ state, retryCount, onRetry, onReset }) {
           <div className="w-16 h-16 bg-coffee-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
             <FiLoader className="text-coffee-600 text-2xl animate-spin" />
           </div>
-          <p className="font-semibold text-charcoal">
+          <p className="font-semibold text-stone-800">
             Submitting your profile...
           </p>
           {retryCount > 0 && (
-            <p className="text-xs text-coffee-500 mt-1">
+            <p className="text-xs text-stone-600 mt-1">
               Retry attempt {retryCount} of {MAX_RETRIES}...
             </p>
           )}
@@ -174,10 +174,10 @@ function SubmitOverlay({ state, retryCount, onRetry, onReset }) {
           <div className="w-20 h-20 bg-green-100 rounded-3xl flex items-center justify-center mx-auto mb-6">
             <FiCheck className="text-green-600 text-4xl" />
           </div>
-          <h2 className="text-2xl font-bold text-charcoal mb-2">
+          <h2 className="text-2xl font-bold text-stone-800 mb-2">
             You're on the list!
           </h2>
-          <p className="text-sm text-coffee-600 leading-relaxed mb-6">
+          <p className="text-sm text-stone-600 leading-relaxed mb-6">
             We'll review your profile and reach out on WhatsApp once we find
             your travel crew. ☕
           </p>
@@ -196,7 +196,7 @@ function SubmitOverlay({ state, retryCount, onRetry, onReset }) {
                   <div className="w-5 h-5 rounded-full bg-coffee-600 text-white text-xs font-bold flex items-center justify-center shrink-0 mt-0.5">
                     {i + 1}
                   </div>
-                  <p className="text-xs text-charcoal">{step}</p>
+                  <p className="text-xs text-stone-700">{step}</p>
                 </div>
               ))}
             </div>
@@ -213,12 +213,12 @@ function SubmitOverlay({ state, retryCount, onRetry, onReset }) {
       <div className="fixed inset-0 bg-cream/95 backdrop-blur-sm z-50 flex items-center justify-center px-6">
         <div className="text-center max-w-sm w-full">
           <div className="w-16 h-16 bg-red-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-            <FiAlertCircle className="text-red-500 text-2xl" />
+            <FiAlertCircle className="text-red-600 text-2xl" />
           </div>
-          <h2 className="text-lg font-bold text-charcoal mb-2">
+          <h2 className="text-lg font-bold text-stone-800 mb-2">
             Submission failed
           </h2>
-          <p className="text-sm text-coffee-600 mb-6 leading-relaxed">
+          <p className="text-sm text-stone-600 mb-6 leading-relaxed">
             We tried {MAX_RETRIES} times but couldn't reach the server. Your
             data is safe locally — try again when reconnected.
           </p>
@@ -236,10 +236,10 @@ function SubmitOverlay({ state, retryCount, onRetry, onReset }) {
 
 function Label({ children, optional }) {
   return (
-    <label className="field-label">
+    <label className="block text-xs font-bold text-stone-700 mb-1.5 uppercase tracking-wide">
       {children}
       {optional && (
-        <span className="text-coffee-300 normal-case font-normal ml-1">
+        <span className="text-stone-400 normal-case font-normal ml-1">
           (optional)
         </span>
       )}
@@ -263,7 +263,7 @@ function TextInput({
       {label && <Label optional={optional}>{label}</Label>}
       <div className="relative">
         {icon && (
-          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-coffee-400 pointer-events-none">
+          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400 pointer-events-none">
             {icon}
           </span>
         )}
@@ -272,11 +272,13 @@ function TextInput({
           value={value || ""}
           placeholder={placeholder || label}
           onChange={(e) => onChange(name, e.target.value)}
-          className={`field-input ${icon ? "pl-9" : ""} ${error ? "border-red-400 focus:ring-red-400" : ""}`}
+          className={`field-input text-stone-800 placeholder-stone-400 ${icon ? "pl-9" : ""} ${
+            error ? "border-red-400 focus:ring-red-400" : ""
+          }`}
         />
       </div>
       {error && (
-        <p className="flex items-center gap-1 text-red-500 text-xs mt-1">
+        <p className="flex items-center gap-1 text-red-600 text-xs mt-1 font-medium">
           <FiAlertCircle size={10} /> {error}
         </p>
       )}
@@ -301,7 +303,7 @@ function TextArea({
         value={value || ""}
         placeholder={placeholder}
         onChange={(e) => onChange(name, e.target.value)}
-        className="field-input resize-none"
+        className="field-input resize-none text-stone-800 placeholder-stone-400"
       />
     </div>
   );
@@ -322,12 +324,12 @@ function RadioGroup({ label, name, options, value, onChange, locked }) {
               key={val}
               type="button"
               onClick={() => !isLocked && onChange(name, val)}
-              className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-all duration-150 active:scale-95 ${
+              className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-all duration-150 active:scale-95 ${
                 selected
                   ? "bg-coffee-600 text-white border-coffee-600"
                   : isLocked
                     ? "bg-gray-50 text-gray-300 border-gray-200 cursor-not-allowed"
-                    : "bg-white text-coffee-600 border-coffee-200 hover:border-coffee-400"
+                    : "bg-white text-stone-700 border-stone-300 hover:border-coffee-500 hover:text-coffee-700"
               }`}
             >
               {lbl}
@@ -354,22 +356,24 @@ function CheckboxField({ name, label, checked, onChange, sublabel, hint }) {
             className={`w-4 h-4 rounded border-2 flex items-center justify-center transition-all ${
               checked
                 ? "bg-coffee-600 border-coffee-600"
-                : "border-coffee-300 group-hover:border-coffee-500"
+                : "border-stone-400 group-hover:border-coffee-500"
             }`}
           >
             {checked && <FiCheck size={10} className="text-white" />}
           </div>
         </div>
         <div>
-          <p className="text-sm text-charcoal leading-snug">{label}</p>
+          <p className="text-sm text-stone-800 leading-snug font-medium">
+            {label}
+          </p>
           {sublabel && (
-            <p className="text-xs text-coffee-400 mt-0.5">{sublabel}</p>
+            <p className="text-xs text-stone-500 mt-0.5">{sublabel}</p>
           )}
         </div>
       </label>
       {hint && checked && (
-        <p className="text-xs text-coffee-500 mt-1.5 ml-7 flex items-center gap-1">
-          <FiCheck size={10} className="text-green-500" />
+        <p className="text-xs text-green-700 mt-1.5 ml-7 flex items-center gap-1 font-medium">
+          <FiCheck size={10} className="text-green-600" />
           {hint}
         </p>
       )}
@@ -398,10 +402,10 @@ function MultiCheckbox({ label, name, options, selected, onChange }) {
               key={val}
               type="button"
               onClick={() => toggle(val)}
-              className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-all duration-150 active:scale-95 ${
+              className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-all duration-150 active:scale-95 ${
                 sel
                   ? "bg-coffee-600 text-white border-coffee-600"
-                  : "bg-white text-coffee-600 border-coffee-200 hover:border-coffee-400"
+                  : "bg-white text-stone-700 border-stone-300 hover:border-coffee-500 hover:text-coffee-700"
               }`}
             >
               {lbl}
@@ -416,13 +420,13 @@ function MultiCheckbox({ label, name, options, selected, onChange }) {
 function SectionTitle({ icon, title, subtitle }) {
   return (
     <div className="flex items-center gap-2 mb-4 pb-3 border-b border-coffee-100">
-      <div className="w-8 h-8 rounded-lg bg-coffee-100 flex items-center justify-center text-coffee-600 shrink-0">
+      <div className="w-8 h-8 rounded-lg bg-coffee-100 flex items-center justify-center text-coffee-700 shrink-0">
         {icon}
       </div>
       <div>
-        <p className="text-sm font-bold text-charcoal">{title}</p>
+        <p className="text-sm font-bold text-stone-800">{title}</p>
         {subtitle && (
-          <p className="text-xs text-coffee-400 mt-0.5">{subtitle}</p>
+          <p className="text-xs text-stone-500 mt-0.5">{subtitle}</p>
         )}
       </div>
     </div>
@@ -446,7 +450,7 @@ function CitySelect({ value, onChange, error }) {
         <select
           value={value || ""}
           onChange={(e) => onChange("city", e.target.value)}
-          className={`field-select pr-9 ${error ? "border-red-400 focus:ring-red-400" : ""}`}
+          className={`field-select text-stone-800 pr-9 ${error ? "border-red-400 focus:ring-red-400" : ""}`}
         >
           <option value="">Select your city</option>
           {cities.map((c) => (
@@ -455,10 +459,10 @@ function CitySelect({ value, onChange, error }) {
             </option>
           ))}
         </select>
-        <FiChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-coffee-400 pointer-events-none text-sm" />
+        <FiChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 pointer-events-none text-sm" />
       </div>
       {error && (
-        <p className="flex items-center gap-1 text-red-500 text-xs mt-1">
+        <p className="flex items-center gap-1 text-red-600 text-xs mt-1 font-medium">
           <FiAlertCircle size={10} /> {error}
         </p>
       )}
@@ -545,23 +549,17 @@ export default function SignupForm() {
     return () => clearTimeout(debounceRef.current);
   }, [form, ready, syncDraft]);
 
-  // ── Smart update — preference wins, lifestyle locks ───────────────────────
   const update = (key, value) => {
     setForm((p) => {
       const next = { ...p, [key]: value };
-
-      // Preference ON → override lifestyle
       if (key === "preferNonDrinking" && value === true) next.drinking = "no";
       if (key === "preferNonSmoking" && value === true)
         next.smoking = "non-smoker";
       if (key === "preferVegGroup" && value === true) next.food = "veg";
-
-      // Lifestyle changed to conflict → auto-uncheck preference
       if (key === "drinking" && value !== "no") next.preferNonDrinking = false;
       if (key === "smoking" && value !== "non-smoker")
         next.preferNonSmoking = false;
       if (key === "food" && value !== "veg") next.preferVegGroup = false;
-
       return next;
     });
     setErrors((p) => ({ ...p, [key]: undefined }));
@@ -597,13 +595,10 @@ export default function SignupForm() {
       setSave("error");
       return;
     }
-
     setSubmit("submitting");
     setRetry(0);
-
     const draftId = getDraftId();
     let attempt = 0;
-
     while (attempt < MAX_RETRIES) {
       try {
         setRetry(attempt);
@@ -691,10 +686,10 @@ export default function SignupForm() {
         {/* Hero */}
         <div className="text-center pb-2">
           <p className="text-4xl mb-3">☕</p>
-          <h1 className="text-2xl font-bold text-charcoal">
+          <h1 className="text-2xl font-bold text-stone-800">
             Meet Strangers Over Coffee
           </h1>
-          <p className="text-sm text-coffee-500 mt-1 max-w-xs mx-auto leading-relaxed">
+          <p className="text-sm text-stone-500 mt-1 max-w-xs mx-auto leading-relaxed">
             Travel if it clicks 🧳✈️ · Small curated groups · Real. No pressure.
           </p>
         </div>
@@ -780,7 +775,7 @@ export default function SignupForm() {
                 options={["Male", "Female"]}
               />
               {errors.gender && (
-                <p className="text-red-500 text-xs mt-1 flex items-center gap-1">
+                <p className="text-red-600 text-xs mt-1 flex items-center gap-1 font-medium">
                   <FiAlertCircle size={10} /> {errors.gender}
                 </p>
               )}
@@ -817,7 +812,7 @@ export default function SignupForm() {
               onChange={update}
             />
             {errors.ageConfirmed && (
-              <p className="text-red-500 text-xs mt-1 flex items-center gap-1">
+              <p className="text-red-600 text-xs mt-1 flex items-center gap-1 font-medium">
                 <FiAlertCircle size={10} /> {errors.ageConfirmed}
               </p>
             )}
@@ -840,7 +835,7 @@ export default function SignupForm() {
             type="date"
           />
           {form.preferredDate && (
-            <p className="text-xs text-coffee-500 -mt-2">
+            <p className="text-xs text-stone-600 -mt-2 font-medium">
               {new Date(form.preferredDate).toLocaleDateString("en-IN", {
                 day: "numeric",
                 month: "long",
@@ -908,7 +903,7 @@ export default function SignupForm() {
 
           {isCoSponsor && (
             <div className="space-y-3">
-              <p className="text-xs text-coffee-500">
+              <p className="text-xs text-stone-600 font-medium leading-relaxed">
                 If sponsoring, who would you like to sponsor for this trip? (1
                 person, same trip budget as yours)
               </p>
@@ -940,7 +935,6 @@ export default function SignupForm() {
             subtitle="Be honest — it helps with better matching."
           />
 
-          {/* Drinking */}
           <div className="space-y-2">
             <RadioGroup
               label="Drinking"
@@ -963,7 +957,6 @@ export default function SignupForm() {
             />
           </div>
 
-          {/* Smoking */}
           <div className="space-y-2">
             <RadioGroup
               label="Smoking"
@@ -985,7 +978,6 @@ export default function SignupForm() {
             />
           </div>
 
-          {/* Food */}
           <div className="space-y-2">
             <RadioGroup
               label="Food Preference"
@@ -1082,7 +1074,7 @@ export default function SignupForm() {
               />
               {form.payingForBoth && (
                 <div>
-                  <p className="text-xs text-coffee-500 mb-2">
+                  <p className="text-xs text-stone-600 font-medium mb-2">
                     Partner's gender (for pricing)
                   </p>
                   <RadioGroup
@@ -1163,7 +1155,7 @@ export default function SignupForm() {
                 ]}
               />
               {(isCoSponsor || (isCouples && form.payingForBoth)) && (
-                <p className="text-xs text-coffee-400 mt-1.5">
+                <p className="text-xs text-stone-600 mt-1.5 font-medium">
                   If sponsoring, the sponsored person's trip budget will match
                   as yours — or even for couple per head.
                 </p>
@@ -1188,21 +1180,21 @@ export default function SignupForm() {
 
         {/* ── 10. Pricing ── */}
         <div className="bg-coffee-50 border border-coffee-200 rounded-2xl p-5">
-          <p className="text-xs font-bold text-coffee-700 uppercase tracking-wider mb-3">
+          <p className="text-xs font-bold text-stone-700 uppercase tracking-wider mb-3">
             Pricing
           </p>
           <div className="flex items-start justify-between mb-4">
             <div className="space-y-1">
-              <p className="text-sm text-charcoal">
-                <span className="font-semibold">Men:</span> ₹3,999
+              <p className="text-sm text-stone-800">
+                <span className="font-bold">Men:</span> ₹3,999
               </p>
-              <p className="text-sm text-charcoal">
-                <span className="font-semibold">Women:</span> ₹2,999
+              <p className="text-sm text-stone-800">
+                <span className="font-bold">Women:</span> ₹2,999
               </p>
             </div>
             {form.gender && (
               <div className="text-right">
-                <p className="text-xs text-coffee-500">
+                <p className="text-xs text-stone-600 font-medium">
                   {isCouples && form.payingForBoth && partnerFee
                     ? "Total (both)"
                     : "Your fee"}
@@ -1211,7 +1203,7 @@ export default function SignupForm() {
                   ₹{totalFee.toLocaleString("en-IN")}
                 </p>
                 {isCouples && form.payingForBoth && partnerFee && (
-                  <p className="text-xs text-coffee-400">
+                  <p className="text-xs text-stone-500 font-medium">
                     ₹{baseFee.toLocaleString("en-IN")} + ₹
                     {partnerFee.toLocaleString("en-IN")}
                   </p>
@@ -1229,7 +1221,7 @@ export default function SignupForm() {
                 onChange={update}
               />
               {errors.consentRedeemable && (
-                <p className="text-red-500 text-xs mt-1 flex items-center gap-1">
+                <p className="text-red-600 text-xs mt-1 flex items-center gap-1 font-medium">
                   <FiAlertCircle size={10} /> {errors.consentRedeemable}
                 </p>
               )}
@@ -1242,7 +1234,7 @@ export default function SignupForm() {
                 onChange={update}
               />
               {errors.consentExperience && (
-                <p className="text-red-500 text-xs mt-1 flex items-center gap-1">
+                <p className="text-red-600 text-xs mt-1 flex items-center gap-1 font-medium">
                   <FiAlertCircle size={10} /> {errors.consentExperience}
                 </p>
               )}
@@ -1255,7 +1247,7 @@ export default function SignupForm() {
                 onChange={update}
               />
               {errors.consentNoTrip && (
-                <p className="text-red-500 text-xs mt-1 flex items-center gap-1">
+                <p className="text-red-600 text-xs mt-1 flex items-center gap-1 font-medium">
                   <FiAlertCircle size={10} /> {errors.consentNoTrip}
                 </p>
               )}
@@ -1268,7 +1260,7 @@ export default function SignupForm() {
                 onChange={update}
               />
               {errors.consentNoRefund && (
-                <p className="text-red-500 text-xs mt-1 flex items-center gap-1">
+                <p className="text-red-600 text-xs mt-1 flex items-center gap-1 font-medium">
                   <FiAlertCircle size={10} /> {errors.consentNoRefund}
                 </p>
               )}
@@ -1296,7 +1288,7 @@ export default function SignupForm() {
           <div className="bg-coffee-600 rounded-2xl p-5 text-white">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs font-semibold uppercase tracking-wider text-coffee-200 mb-1">
+                <p className="text-xs font-bold uppercase tracking-wider text-coffee-200 mb-1">
                   {isCouples && form.payingForBoth && partnerFee
                     ? "Total Amount (both)"
                     : "Your Booking Amount"}
@@ -1305,13 +1297,13 @@ export default function SignupForm() {
                   ₹{totalFee.toLocaleString("en-IN")}
                 </p>
                 {isCouples && form.payingForBoth && partnerFee ? (
-                  <p className="text-xs text-coffee-300 mt-1">
+                  <p className="text-xs text-coffee-200 mt-1 font-medium">
                     You ({form.gender}) ₹{baseFee.toLocaleString("en-IN")} +
                     Partner ({form.couplePartnerGender}) ₹
                     {partnerFee.toLocaleString("en-IN")}
                   </p>
                 ) : (
-                  <p className="text-xs text-coffee-300 mt-1">
+                  <p className="text-xs text-coffee-200 mt-1">
                     Includes ₹1,000 redeemable at the café
                   </p>
                 )}
@@ -1324,7 +1316,7 @@ export default function SignupForm() {
         {/* ── Submit ── */}
         <div className="pt-2 space-y-3 pb-6">
           {!online && (
-            <div className="flex items-center gap-2 justify-center text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3">
+            <div className="flex items-center gap-2 justify-center text-xs text-amber-800 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 font-medium">
               <FiWifiOff size={13} />
               You're offline — reconnect to submit.
             </div>
@@ -1338,7 +1330,7 @@ export default function SignupForm() {
             <FiSend size={15} /> Book My Slot
           </button>
 
-          <p className="text-center text-xs text-coffee-400 pt-1">
+          <p className="text-center text-xs text-stone-500 pt-1">
             By submitting, you agree to be contacted on WhatsApp for group
             updates.
           </p>

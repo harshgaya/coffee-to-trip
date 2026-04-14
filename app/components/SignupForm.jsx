@@ -853,7 +853,7 @@ export default function SignupForm() {
           <SectionTitle
             icon={<FiHeart size={15} />}
             title="Participation Type"
-            subtitle="How are you joining?"
+            subtitle="How would you like to manage your trip expenses?"
           />
 
           <div className="space-y-3">

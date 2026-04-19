@@ -19,25 +19,25 @@ export default function Footer() {
             </p>
             <div className="flex items-center gap-3 mt-4">
               <a
-                href="#"
+                href="https://www.instagram.com/coffeetotrips.in?igsh=c3JwYjNsaGNqNDEw"
                 className="text-coffee-400 hover:text-coffee-700 transition-colors"
               >
                 <FiInstagram size={16} />
               </a>
-              <a
+              {/* <a
                 href="#"
                 className="text-coffee-400 hover:text-coffee-700 transition-colors"
               >
                 <FiTwitter size={16} />
-              </a>
-              <a
+              </a> */}
+              {/* <a
                 href="https://wa.me/"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-coffee-400 hover:text-green-600 transition-colors"
               >
                 <BsWhatsapp size={16} />
-              </a>
+              </a> */}
             </div>
           </div>
 

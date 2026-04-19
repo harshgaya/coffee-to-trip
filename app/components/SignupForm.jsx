@@ -147,7 +147,7 @@ function StickySaveBar({ status, online, onRetry, onClear, hasData }) {
 
 // ── Submit Overlay ────────────────────────────────────────────────────────────
 
-function SubmitOverlay({ state, retryCount, onRetry, onReset }) {
+function SubmitOverlay({ state, retryCount, onRetry, onReset, onDismiss }) {
   if (state === "submitting") {
     return (
       <div className="fixed inset-0 bg-cream/90 backdrop-blur-sm z-50 flex items-center justify-center px-6">
@@ -156,7 +156,10 @@ function SubmitOverlay({ state, retryCount, onRetry, onReset }) {
             <FiLoader className="text-coffee-600 text-2xl animate-spin" />
           </div>
           <p className="font-semibold text-stone-800">
-            Submitting your profile...
+            Processing your payment...
+          </p>
+          <p className="text-xs text-stone-600 mt-1">
+            Please don't close this page.
           </p>
           {retryCount > 0 && (
             <p className="text-xs text-stone-600 mt-1">
@@ -216,14 +219,45 @@ function SubmitOverlay({ state, retryCount, onRetry, onReset }) {
             <FiAlertCircle className="text-red-600 text-2xl" />
           </div>
           <h2 className="text-lg font-bold text-stone-800 mb-2">
-            Submission failed
+            Payment failed
           </h2>
           <p className="text-sm text-stone-600 mb-6 leading-relaxed">
-            We tried {MAX_RETRIES} times but couldn't reach the server. Your
-            data is safe locally — try again when reconnected.
+            The payment couldn't be completed. If any amount was debited, it
+            will be auto-refunded by your bank within 5–7 days. You can try
+            again.
           </p>
-          <button onClick={onRetry} className="btn-primary">
-            <FiRefreshCw size={14} /> Try Again
+          <div className="flex flex-col gap-2">
+            <button onClick={onRetry} className="btn-primary">
+              <FiRefreshCw size={14} /> Try Again
+            </button>
+            <button
+              onClick={onDismiss}
+              className="text-sm text-stone-600 hover:text-coffee-700 py-2"
+            >
+              Back to form
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+  if (state === "pending_timeout") {
+    return (
+      <div className="fixed inset-0 bg-cream/95 backdrop-blur-sm z-50 flex items-center justify-center px-6">
+        <div className="text-center max-w-sm w-full">
+          <div className="w-16 h-16 bg-amber-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <FiClock className="text-amber-600 text-2xl" />
+          </div>
+          <h2 className="text-lg font-bold text-stone-800 mb-2">
+            Payment is being verified
+          </h2>
+          <p className="text-sm text-stone-600 mb-6 leading-relaxed">
+            Your payment is taking longer than usual to confirm. If the amount
+            was debited, we'll reach out on WhatsApp shortly. You can safely
+            close this page.
+          </p>
+          <button onClick={onDismiss} className="btn-primary">
+            Okay, got it
           </button>
         </div>
       </div>
@@ -470,6 +504,20 @@ function CitySelect({ value, onChange, error }) {
   );
 }
 
+// ── Razorpay Script Loader ────────────────────────────────────────────────────
+
+function loadRazorpayScript() {
+  return new Promise((resolve) => {
+    if (typeof window === "undefined") return resolve(false);
+    if (window.Razorpay) return resolve(true);
+    const s = document.createElement("script");
+    s.src = "https://checkout.razorpay.com/v1/checkout.js";
+    s.onload = () => resolve(true);
+    s.onerror = () => resolve(false);
+    document.body.appendChild(s);
+  });
+}
+
 // ── Main Form ─────────────────────────────────────────────────────────────────
 
 export default function SignupForm() {
@@ -484,7 +532,49 @@ export default function SignupForm() {
   const debounceRef = useRef(null);
   const pendingRef = useRef(false);
   const isFirst = useRef(true);
+  const pollRef = useRef(null);
 
+  // Cleanup polling on unmount
+  useEffect(() => {
+    return () => {
+      if (pollRef.current) clearInterval(pollRef.current);
+    };
+  }, []);
+
+  // Polling for payment status — stable reference
+  const startPolling = useCallback((draftId) => {
+    if (pollRef.current) clearInterval(pollRef.current);
+    let attempts = 0;
+    const maxAttempts = 90; // 90 × 2s = 3 minutes
+
+    pollRef.current = setInterval(async () => {
+      attempts++;
+      try {
+        const r = await fetch(`/api/payment/status?draftId=${draftId}`);
+        const data = await r.json();
+
+        if (data.status === "PAID") {
+          clearInterval(pollRef.current);
+          pollRef.current = null;
+          localStorage.removeItem(DRAFT_KEY);
+          localStorage.removeItem(DRAFT_ID_KEY);
+          setSubmit("success");
+        } else if (data.status === "FAILED") {
+          clearInterval(pollRef.current);
+          pollRef.current = null;
+          setSubmit("failed");
+        } else if (attempts >= maxAttempts) {
+          clearInterval(pollRef.current);
+          pollRef.current = null;
+          setSubmit("pending_timeout");
+        }
+      } catch {
+        // keep polling on transient errors
+      }
+    }, 2000);
+  }, []);
+
+  // Restore draft from localStorage
   useEffect(() => {
     const local = localStorage.getItem(DRAFT_KEY);
     if (local) {
@@ -497,6 +587,30 @@ export default function SignupForm() {
     setReady(true);
   }, []);
 
+  // On load: check if a previous payment is completed/pending
+  useEffect(() => {
+    if (!ready) return;
+    const draftId = localStorage.getItem(DRAFT_ID_KEY);
+    const localForm = localStorage.getItem(DRAFT_KEY);
+    if (!draftId) return;
+
+    fetch(`/api/payment/status?draftId=${draftId}`)
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.status === "PAID") {
+          localStorage.removeItem(DRAFT_KEY);
+          localStorage.removeItem(DRAFT_ID_KEY);
+          setSubmit("success");
+        } else if (data.status === "PENDING" && localForm) {
+          // Only resume if there's still form data (same user session flow)
+          setSubmit("submitting");
+          startPolling(draftId);
+        }
+      })
+      .catch(() => {});
+  }, [ready, startPolling]);
+
+  // Resume syncing draft when coming back online
   useEffect(() => {
     if (online && pendingRef.current) {
       pendingRef.current = false;
@@ -507,6 +621,7 @@ export default function SignupForm() {
         } catch {}
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [online]);
 
   const syncDraft = useCallback(
@@ -536,6 +651,7 @@ export default function SignupForm() {
     [online],
   );
 
+  // Debounced draft auto-save
   useEffect(() => {
     if (!ready) return;
     if (isFirst.current) {
@@ -590,39 +706,126 @@ export default function SignupForm() {
   };
 
   const doSubmit = async () => {
+    if (submitState === "submitting") return; // prevent double-click
     if (!validate()) return;
     if (!online) {
       setSave("error");
       return;
     }
+
     setSubmit("submitting");
-    setRetry(0);
     const draftId = getDraftId();
-    let attempt = 0;
-    while (attempt < MAX_RETRIES) {
-      try {
-        setRetry(attempt);
-        const data = await fetchWithRetry(
-          "/api/signup",
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ ...form, draftId }),
-          },
-          1,
-        );
-        if (data.success) {
-          localStorage.removeItem(DRAFT_KEY);
-          localStorage.removeItem(DRAFT_ID_KEY);
-          setSubmit("success");
-          return;
-        }
-        throw new Error("failed");
-      } catch {
-        attempt++;
-        if (attempt < MAX_RETRIES) await sleep(800 * Math.pow(2, attempt));
-        else setSubmit("failed");
+
+    try {
+      const loaded = await loadRazorpayScript();
+      if (!loaded) {
+        setSubmit("failed");
+        return;
       }
+
+      const orderRes = await fetch("/api/payment/create-order", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ draftId, formData: form }),
+      });
+      const orderData = await orderRes.json();
+
+      if (!orderData.success) {
+        console.error("create-order failed:", orderData);
+        setSubmit("failed");
+        return;
+      }
+
+      if (orderData.alreadyPaid) {
+        localStorage.removeItem(DRAFT_KEY);
+        localStorage.removeItem(DRAFT_ID_KEY);
+        setSubmit("success");
+        return;
+      }
+
+      if (orderData.pending) {
+        startPolling(draftId);
+        return;
+      }
+
+      const rzp = new window.Razorpay({
+        key: orderData.keyId,
+        amount: orderData.amount,
+        currency: orderData.currency,
+        order_id: orderData.orderId,
+        name: "Coffee & Travel Together",
+        description: "Curated coffee experience booking",
+        prefill: {
+          name: `${form.firstName || ""} ${form.lastName || ""}`.trim(),
+          contact: form.phone || "",
+        },
+        notes: { draftId },
+        theme: { color: "#6F4E37" },
+        retry: { enabled: true, max_count: 3 },
+        timeout: 600,
+        handler: async (response) => {
+          // Razorpay says payment was submitted — verify & poll for final confirmation
+          try {
+            await fetch("/api/payment/verify", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(response),
+            });
+          } catch {
+            // Even if verify fails, webhook will still finalize
+          }
+          setSubmit("submitting");
+          startPolling(draftId);
+        },
+        modal: {
+          ondismiss: () => {
+            // User closed modal — keep overlay and check status (maybe they paid anyway)
+            setSubmit("submitting");
+            fetch(`/api/payment/status?draftId=${draftId}`)
+              .then((r) => r.json())
+              .then((data) => {
+                if (data.status === "PAID") {
+                  localStorage.removeItem(DRAFT_KEY);
+                  localStorage.removeItem(DRAFT_ID_KEY);
+                  setSubmit("success");
+                } else if (data.status === "PENDING") {
+                  startPolling(draftId);
+                } else {
+                  // Genuinely dismissed without paying — back to form
+                  setSubmit(null);
+                }
+              })
+              .catch(() => setSubmit(null));
+          },
+          escape: false,
+          backdropclose: false,
+        },
+      });
+
+      rzp.on("payment.failed", (response) => {
+        console.error("Razorpay payment failed:", response?.error);
+        // Brief delay in case webhook flips it to PAID, then show failed
+        setSubmit("submitting");
+        setTimeout(() => {
+          fetch(`/api/payment/status?draftId=${draftId}`)
+            .then((r) => r.json())
+            .then((data) => {
+              if (data.status === "PAID") {
+                localStorage.removeItem(DRAFT_KEY);
+                localStorage.removeItem(DRAFT_ID_KEY);
+                setSubmit("success");
+              } else {
+                setSubmit("failed");
+              }
+            })
+            .catch(() => setSubmit("failed"));
+        }, 3000);
+      });
+
+      rzp.open();
+    } catch (err) {
+      console.error("doSubmit error:", err);
+      setSubmit("failed");
     }
   };
 
@@ -636,6 +839,21 @@ export default function SignupForm() {
     } catch {}
     setForm({});
     setSave(null);
+  };
+
+  const handleOverlayReset = () => {
+    // Used by "success" and "failed" to go back to a fresh form
+    localStorage.removeItem(DRAFT_KEY);
+    localStorage.removeItem(DRAFT_ID_KEY);
+    setForm({});
+    setSave(null);
+    setSubmit(null);
+  };
+
+  const handleOverlayDismiss = () => {
+    // Used by "pending_timeout" and "failed" — close overlay but keep draft
+    // (payment may still succeed via webhook in the background)
+    setSubmit(null);
   };
 
   if (!ready) return null;
@@ -665,13 +883,8 @@ export default function SignupForm() {
           setSubmit(null);
           doSubmit();
         }}
-        onReset={() => {
-          localStorage.removeItem(DRAFT_KEY);
-          localStorage.removeItem(DRAFT_ID_KEY);
-          setForm({});
-          setSave(null);
-          setSubmit(null);
-        }}
+        onReset={handleOverlayReset}
+        onDismiss={handleOverlayDismiss}
       />
 
       <StickySaveBar
@@ -685,7 +898,6 @@ export default function SignupForm() {
       <div className="max-w-xl mx-auto px-4 pt-8 pb-16 space-y-5">
         {/* Hero */}
         <div className="text-center pb-2">
-          {/* <p className="text-4xl mb-3">☕</p> */}
           <h1 className="text-2xl font-semibold text-stone-800 mt-5">
             Meet New People Over Coffee ☕
           </h1>
@@ -827,7 +1039,7 @@ export default function SignupForm() {
           <SectionTitle
             icon={<FiCalendar size={15} />}
             title="Coffee Experience Slot"
-            subtitle="Pick your preferred date."
+            subtitle="Pick your preferred date.Our team will schedule your coffee experience and inform you in advance (mostly weekends)."
           />
           <TextInput
             label="Preferred Date"
@@ -870,7 +1082,7 @@ export default function SignupForm() {
             />
             <CheckboxField
               name="participationType"
-              label="  ⁠I’d like to support one participant’s experience"
+              label="  ⁠I'd like to support one participant's experience"
               checked={form.participationType === "co-sponsor"}
               onChange={() =>
                 update(
@@ -881,7 +1093,7 @@ export default function SignupForm() {
             />
             <CheckboxField
               name="participationType"
-              label=" ⁠I’d like to be supported"
+              label=" ⁠I'd like to be supported"
               checked={form.participationType === "sponsored"}
               onChange={() =>
                 update(
@@ -1327,15 +1539,23 @@ export default function SignupForm() {
 
           <button
             onClick={doSubmit}
-            disabled={!online}
+            disabled={!online || submitState === "submitting"}
             className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed active:scale-95 transition-transform"
           >
-            <FiSend size={15} /> Book My Slot
+            {submitState === "submitting" ? (
+              <>
+                <FiLoader size={15} className="animate-spin" /> Processing...
+              </>
+            ) : (
+              <>
+                <FiSend size={15} /> Book My Slot
+              </>
+            )}
           </button>
 
           <p className="text-center text-xs text-stone-500 pt-1">
             By submitting, you agree to be contacted on WhatsApp for group
-            updates.
+            updates. Payments secured by Razorpay.
           </p>
         </div>
       </div>

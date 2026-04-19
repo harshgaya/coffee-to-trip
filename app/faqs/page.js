@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { FiChevronDown, FiChevronUp } from "react-icons/fi";
+import { FiChevronDown, FiChevronUp, FiInstagram } from "react-icons/fi";
 
 const FAQS = [
   {
@@ -128,6 +128,10 @@ const FAQS = [
         q: "Can I cancel or get a refund if the date is delayed?",
         a: "No. Since this is a curated experience and not a fixed-time event, delays may occur to ensure quality. Bookings are non-refundable and non-cancellable.",
       },
+      {
+        q: "How is the coffee experience scheduled?",
+        a: "We don’t operate on fixed dates. Your coffee experience is curated by our team based on applications, group balance, compatibility, and overall vibe.Sessions are usually held on Friday, Saturday, or Sunday, and you will be informed of your confirmed slot 2–3 days in advance. Scheduling is based on creating the right group, not on first-come booking.",
+      },
     ],
   },
 ];
@@ -194,12 +198,12 @@ export default function FAQsPage() {
           hours.
         </p>
         <a
-          href="https://wa.me/919999999999"
+          href="https://www.instagram.com/coffeetotrips.in?igsh=c3JwYjNsaGNqNDEw"
           target="_blank"
           rel="noopener noreferrer"
           className="inline-block bg-green-500 hover:bg-green-600 text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition-colors"
         >
-          💬 Chat on WhatsApp
+          💬 Connect on Instagram
         </a>
       </div>
     </div>

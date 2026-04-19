@@ -11,15 +11,18 @@ import {
   FiChevronUp,
   FiChevronDown,
   FiX,
+  FiCreditCard,
   FiAlertCircle,
   FiMapPin,
   FiMenu,
 } from "react-icons/fi";
 import { MdOutlineCoffee } from "react-icons/md";
 import { BsWhatsapp } from "react-icons/bs";
+import PaymentsSection from "./payment-section";
 
 const NAV_ITEMS = [
   { id: "signups", label: "Signups", icon: <FiUsers size={15} /> },
+  { id: "payments", label: "Payments", icon: <FiCreditCard size={15} /> },
   { id: "cities", label: "Cities", icon: <FiMapPin size={15} /> },
 ];
 
@@ -762,6 +765,7 @@ export default function AdminDashboard() {
 
   const renderSection = () => {
     if (activeSection === "signups") return <SignupsSection />;
+    if (activeSection === "payments") return <PaymentsSection />;
     if (activeSection === "cities") return <CitiesSection />;
     return null;
   };

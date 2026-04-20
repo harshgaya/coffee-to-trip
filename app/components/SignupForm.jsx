@@ -1431,7 +1431,7 @@ export default function SignupForm() {
             <div data-error={errors.consentRedeemable ? true : undefined}>
               <CheckboxField
                 name="consentRedeemable"
-                label="I understand ₹1,000 is redeemable at the café (food & beverages)"
+                label="I understand ₹15,000 is redeemable at the café (food & beverages)"
                 checked={form.consentRedeemable}
                 onChange={update}
               />

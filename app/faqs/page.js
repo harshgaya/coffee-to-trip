@@ -80,7 +80,7 @@ const FAQS = [
     items: [
       {
         q: "What is included in the price?",
-        a: "₹1,000 is redeemable at the café for food & beverages. The rest covers curation, hosting, and experience design.",
+        a: "₹15,000 is redeemable at the café for food & beverages. The rest covers curation, hosting, and experience design.",
       },
       {
         q: "Why are prices different for men and women?",

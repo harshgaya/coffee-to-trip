@@ -1038,8 +1038,10 @@ export default function SignupForm() {
         <div className="section-card space-y-4">
           <SectionTitle
             icon={<FiCalendar size={15} />}
-            title="Coffee Experience Slot"
-            subtitle="Pick your preferred date.Our team will schedule your coffee experience and inform you in advance (mostly weekends)."
+            title="Coffee Experience Scheduling"
+            subtitle="Pick your preferred date.No fixed dates. Your slot is curated by our team based on group balance and compatibility.
+
+Sessions are usually set for the earliest suitable weekend, with 2–3 days’ notice."
           />
           <TextInput
             label="Preferred Date"
@@ -1431,7 +1433,7 @@ export default function SignupForm() {
             <div data-error={errors.consentRedeemable ? true : undefined}>
               <CheckboxField
                 name="consentRedeemable"
-                label="I understand ₹15,000 is redeemable at the café (food & beverages)"
+                label="I understand ₹1,500 is redeemable at the café (food & beverages)"
                 checked={form.consentRedeemable}
                 onChange={update}
               />

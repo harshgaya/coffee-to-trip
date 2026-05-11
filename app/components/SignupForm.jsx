@@ -862,10 +862,10 @@ export default function SignupForm() {
   const isSponsored = form.participationType === "sponsored";
   const isCoSponsor = form.participationType === "co-sponsor";
 
-  const baseFee = form.gender === "Female" ? 2999 : 3999;
+  const baseFee = form.gender === "Female" ? 1999 : 3999;
   const partnerFee =
     form.couplePartnerGender === "Female"
-      ? 2999
+      ? 1999
       : form.couplePartnerGender === "Male"
         ? 3999
         : null;
@@ -1300,7 +1300,7 @@ Sessions are usually set for the earliest suitable weekend, with 2–3 days’ n
                     onChange={update}
                     options={[
                       { value: "Male", label: "Male (₹3,999)" },
-                      { value: "Female", label: "Female (₹2,999)" },
+                      { value: "Female", label: "Female (₹1,999)" },
                     ]}
                   />
                 </div>
@@ -1403,10 +1403,10 @@ Sessions are usually set for the earliest suitable weekend, with 2–3 days’ n
           <div className="flex items-start justify-between mb-4">
             <div className="space-y-1">
               <p className="text-sm text-stone-800">
-                <span className="font-bold">Men:</span> ₹3,999
+                <span className="font-bold">💃Women:</span> ₹1,999
               </p>
               <p className="text-sm text-stone-800">
-                <span className="font-bold">Women:</span> ₹2,999
+                <span className="font-bold">🕺Men:</span> ₹3,999
               </p>
             </div>
             {form.gender && (

@@ -479,7 +479,9 @@ function CitySelect({ value, onChange, error }) {
   }, []);
   return (
     <div>
-      <Label>City *</Label>
+      <Label>
+        City <span className="text-red-500">*</span>
+      </Label>
       <div className="relative">
         <select
           value={value || ""}
@@ -936,7 +938,11 @@ export default function SignupForm() {
           <div className="grid grid-cols-2 gap-3">
             <div data-error={errors.firstName ? true : undefined}>
               <TextInput
-                label="First Name *"
+                label={
+                  <>
+                    First Name <span className="text-red-500">*</span>
+                  </>
+                }
                 name="firstName"
                 value={form.firstName}
                 onChange={update}
@@ -946,7 +952,11 @@ export default function SignupForm() {
             </div>
             <div data-error={errors.lastName ? true : undefined}>
               <TextInput
-                label="Last Name *"
+                label={
+                  <>
+                    Last Name <span className="text-red-500">*</span>
+                  </>
+                }
                 name="lastName"
                 value={form.lastName}
                 onChange={update}
@@ -958,7 +968,11 @@ export default function SignupForm() {
 
           <div data-error={errors.phone ? true : undefined}>
             <TextInput
-              label="Phone Number *"
+              label={
+                <>
+                  Phone Number <span className="text-red-500">*</span>
+                </>
+              }
               icon={<FiPhone size={14} />}
               name="phone"
               value={form.phone}
@@ -972,7 +986,11 @@ export default function SignupForm() {
           <div className="grid grid-cols-2 gap-3">
             <div data-error={errors.age ? true : undefined}>
               <TextInput
-                label="Age * (21+)"
+                label={
+                  <>
+                    Age (21+) <span className="text-red-500">*</span>
+                  </>
+                }
                 name="age"
                 value={form.age}
                 onChange={update}
@@ -983,7 +1001,11 @@ export default function SignupForm() {
             </div>
             <div data-error={errors.gender ? true : undefined}>
               <RadioGroup
-                label="Gender *"
+                label={
+                  <>
+                    Gender <span className="text-red-500">*</span>
+                  </>
+                }
                 name="gender"
                 value={form.gender}
                 onChange={update}
@@ -1292,7 +1314,7 @@ Sessions are usually set for the earliest suitable weekend, with 2–3 days’ n
               {form.payingForBoth && (
                 <div>
                   <p className="text-xs text-stone-600 font-medium mb-2">
-                    Partner's gender (for pricing)
+                    Select Partner's gender who joins along with you
                   </p>
                   <RadioGroup
                     name="couplePartnerGender"

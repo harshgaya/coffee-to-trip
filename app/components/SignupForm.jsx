@@ -1374,15 +1374,15 @@ Sessions are usually set for the earliest suitable weekend, with 2–3 days’ n
               onChange={update}
               options={[
                 { value: "local", label: "Local 🚙" },
-                { value: "domestic", label: "domestic 🚂" },
-                { value: "international", label: "nternational ✈️" },
+                { value: "domestic", label: "Domestic 🚂" },
+                { value: "international", label: "International ✈️" },
                 {
                   value: "live concert domestic",
                   label: "Live concerts domestic 🎸",
                 },
                 {
                   value: "international concert international",
-                  label: "live concerts international ✈️",
+                  label: "Live concerts international ✈️",
                 },
               ]}
             />

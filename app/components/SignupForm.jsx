@@ -1373,9 +1373,17 @@ Sessions are usually set for the earliest suitable weekend, with 2–3 days’ n
               value={form.tripType}
               onChange={update}
               options={[
-                { value: "local", label: "Local (1–2 days)" },
-                { value: "domestic", label: "Domestic (3–8 days)" },
-                { value: "international", label: "International" },
+                { value: "local", label: "Local 🚙" },
+                { value: "domestic", label: "domestic 🚂" },
+                { value: "international", label: "nternational ✈️" },
+                {
+                  value: "live concert domestic",
+                  label: "Live concerts domestic 🎸",
+                },
+                {
+                  value: "international concert international",
+                  label: "live concerts international ✈️",
+                },
               ]}
             />
 
